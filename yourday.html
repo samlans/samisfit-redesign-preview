@@ -1,0 +1,132 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your Day Quote</title>
+<style>
+/* ============================================================
+   Your Day hub - "taller tiles, smaller, + quote of the day"
+   Tiles sized to content (no hero void), a quote block fills
+   the base. Fuel/weigh-in/date fixes carried over.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --shadow:0 26px 60px -28px rgba(20,18,12,.62);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;
+  --line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;
+  --shadow:0 26px 60px -24px rgba(0,0,0,.78);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:40px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,44px)/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.02em;margin:14px 0 10px;text-wrap:balance}
+.lede{max-width:66ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0 2px}
+.btn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer}
+.note{font-size:12.5px;color:var(--muted)}
+.stage-wrap{display:flex;justify-content:center;margin-top:30px}
+
+.phone{width:100%;max-width:372px;aspect-ratio:9/19.5;border-radius:38px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08)}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#efece3;color:#1b1a17}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:13px 22px 2px;font-size:12px;font-weight:700;flex:none}
+.sb .r{font-size:10.5px;opacity:.85}
+.top{display:flex;justify-content:space-between;align-items:center;padding:7px 18px 10px;flex:none}
+.top .d{font:800 23px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.top .me{width:31px;height:31px;border-radius:50%;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 12px/1 "Bricolage Grotesque";flex:none}
+
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 13px 12px;align-content:start;flex:none}
+.t{border-radius:22px;padding:17px;display:flex;flex-direction:column;justify-content:space-between;min-height:116px;position:relative;overflow:hidden}
+.wide{grid-column:1 / 3}
+.tk{font:800 10.5px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.val{font:800 28px/1 "Bricolage Grotesque";letter-spacing:-.02em;margin-top:auto}
+.val small{font-size:12px;opacity:.55;font-weight:700}
+
+.t.hero{background:#1a1813;color:#fff}
+.t.coral{background:#ff6b5e;color:#2a0b07}
+.t.sky{background:#8fd3e8;color:#06252f}
+.t.amber{background:#ffc247;color:#2a1c00}
+.t.card{background:#fff;border:1px solid #e6e3d9}
+
+.hero{justify-content:flex-start}
+.hero .htop{display:flex;justify-content:space-between;align-items:center}
+.hero .htop .tk{opacity:.7}
+.hero .wklabel{font:800 10px/1 "Hanken Grotesk";letter-spacing:.1em;color:#ff9d6a}
+.hero .tt{font:800 33px/1 "Bricolage Grotesque";letter-spacing:-.025em;margin:7px 0 3px}
+.hero .ts{font-size:12px;opacity:.68}
+.wk{display:flex;gap:5px;margin:12px 0 2px}
+.wk .c{flex:1;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font:800 11px/1 "Bricolage Grotesque";background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
+.wk .c.done{background:#bfe39a;color:#243800}
+.wk .c.today{background:#ff6b5e;color:#2a0b07;box-shadow:0 0 0 2px rgba(255,107,94,.35)}
+.wk .c.rest{background:rgba(255,255,255,.04);color:rgba(255,255,255,.26);font-size:9px}
+.hero .gobtn{margin-top:12px;align-self:stretch;background:#ff6b5e;color:#2a0b07;border:0;border-radius:13px;
+  padding:12px;font-weight:800;font-size:14px;font-family:"Hanken Grotesk";cursor:pointer}
+
+.fuelbar{height:7px;border-radius:999px;background:rgba(0,0,0,.14);margin-top:9px;overflow:hidden}
+.fuelbar i{display:block;height:100%;width:62%;background:#2a0b07;border-radius:999px}
+.logged{position:absolute;top:12px;right:13px;font:800 9px/1 "Hanken Grotesk";letter-spacing:.08em;
+  background:rgba(40,120,0,.12);color:#3c7a00;padding:5px 7px;border-radius:999px}
+
+/* quote of the day - set on the background, no card */
+.quote{flex:1;margin:0;padding:18px 26px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:92px}
+.quote .ql{font:800 10px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercase;color:#c23b16}
+.quote blockquote{margin:0;font:500 italic 19px/1.4 "Newsreader",Georgia,serif;letter-spacing:-.01em;color:#7a766b}
+.quote .qa{font:700 12px/1 "Hanken Grotesk";color:#9a9488;letter-spacing:.01em}
+.quote .qa b{color:#6f6b60;font-weight:800}
+
+.handle{flex:none;display:flex;justify-content:center;padding:4px 0 9px}
+.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+
+.footnote{max-width:66ch;margin:28px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}
+.footnote b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Your Day &middot; taller tiles + quote</span>
+  <h1>Smaller tiles, quote of the day at the base</h1>
+  <p class="lede">The <b>taller-tiles</b> idea, with the tiles brought down a notch so they size to their content (no more black void in the hero), and an <b>italic quote of the day</b> filling the space at the bottom. Quote is a placeholder in <b>Newsreader italic</b>; say the word and I'll swap the type or wire it to a real rotating list. The date is back to your single-line <b>"Thu, Oct 1"</b> top-left, and Fuel and Weigh-in carry the fixes from the last round.</p>
+  <div class="bar"><span class="note">Bricolage numbers &middot; Hanken labels &middot; Newsreader italic for the quote</span></div>
+
+  <div class="stage-wrap">
+    <div class="phone"><div class="scr">
+      <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+      <div class="top"><span class="d">Thu, Oct 1</span><span class="me">S</span></div>
+      <div class="bento">
+        <div class="t hero wide">
+          <div class="htop"><span class="tk">Up next</span><span class="wklabel">WEEK 2 OF 6</span></div>
+          <div class="tt">Legs A</div>
+          <div class="ts">6 exercises &middot; ~52 min</div>
+          <div class="wk">
+            <div class="c done">1</div><div class="c today">2</div><div class="c">3</div>
+            <div class="c rest">rest</div><div class="c">5</div><div class="c">6</div>
+          </div>
+          <button class="gobtn">Start workout &rarr;</button>
+        </div>
+        <div class="t coral">
+          <div class="tk">Calories left</div>
+          <div class="val">1,502<small> of 2,400</small></div>
+          <div class="fuelbar"><i></i></div>
+        </div>
+        <div class="t card">
+          <span class="logged">&check; LOGGED</span>
+          <div class="tk">Weight</div>
+          <div class="val">148.0<small> lb</small></div>
+        </div>
+        <div class="t amber"><div class="tk">Meals</div><div class="val">0<small>/3</small></div></div>
+        <div class="t sky"><div class="tk">Steps</div><div class="val">4,210<small>/8k</small></div></div>
+      </div>
+      <div class="quote">
+        <span class="ql">Quote of the day</span>
+        <blockquote>"The last three or four reps is what makes the muscle grow. This area of pain divides a champion from someone who isn't."</blockquote>
+        <span class="qa"><b>Arnold Schwarzenegger</b></span>
+      </div>
+      <div class="handle"><span></span></div>
+    </div></div>
+  </div>
+
+  <div class="footnote">
+    Tiles sized to content, so the hero no longer stretches into empty black space; the <b>quote block takes the slack at the base</b> and grows or shrinks with the screen. Tell me if the quote should be larger/quieter, whether Newsreader italic is the right voice, and if you want it on a card (as shown) or set directly on the background with no card.
+  </div>
+</div>

@@ -1,0 +1,234 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mesocycle Builder Directions</title>
+<style>
+/* ============================================================
+   SamsisFit - Mesocycle / routine builder, directions in the
+   new language. Build flow (name, weeks+deload, days+assign,
+   review) + the day/exercise builder. Subtle GSAP entrance.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --shadow:0 26px 60px -30px rgba(20,18,12,.6);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:40px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,46px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:13px 0 10px;text-wrap:balance}
+.lede{max-width:74ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 2px}
+.btn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:flex;flex-wrap:wrap;gap:30px;justify-content:center;margin-top:28px}
+.col{width:320px;max-width:100%;display:flex;flex-direction:column;gap:12px}
+.tag{font:800 14px/1.3 "Bricolage Grotesque";letter-spacing:-.01em}
+.tag span{display:block;font:600 12px/1.45 "Hanken Grotesk";color:var(--muted);margin-top:4px}
+.tag em{font-style:normal;color:var(--accent)}
+
+.phone{width:100%;aspect-ratio:9/19.5;border-radius:38px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08)}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#efece3;color:#1b1a17}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:11px 20px 2px;font-size:11.5px;font-weight:700;flex:none}
+.sb .r{font-size:10px;opacity:.85}
+.head{display:flex;align-items:center;gap:10px;padding:7px 15px 8px;flex:none}
+.head .bk{width:28px;height:28px;border-radius:50%;background:#e3dfd3;color:#6f6c62;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700}
+.head .t{font:800 17px/1 "Bricolage Grotesque";letter-spacing:-.01em}
+.head .r2{margin-left:auto;font:800 11px/1 "Hanken Grotesk";color:#8a867b}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;padding:4px 13px 12px;overflow:hidden}
+.sech{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;color:#9a9488;padding:5px 2px 0}
+
+.steprail{display:flex;align-items:center;gap:6px;padding:4px 2px 4px}
+.steprail .sp{font:800 8.5px/1 "Hanken Grotesk";letter-spacing:.05em;text-transform:uppercase;color:#bdb7a7;white-space:nowrap}
+.steprail .sp.cur{color:#1a1813}.steprail .sp.done{color:#4b7a00}
+.steprail .ln{flex:1;height:2px;background:#ddd7c9;border-radius:2px}
+.steprail .ln.done{background:#bfe39a}
+
+.panelc{background:#fff;border:1px solid #e6e3d9;border-radius:18px;padding:16px}
+.panelc .pk{font:800 10px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:#9a9488}
+.panelc .ps{font:600 12px/1.3 "Hanken Grotesk";color:#8a867b;margin-top:4px}
+.bigstep{display:flex;align-items:center;gap:14px;justify-content:center;padding:10px 0 4px}
+.bigstep .sx{width:46px;height:46px;border-radius:14px;background:#1a1813;color:#fff;border:0;font:800 24px/1 "Bricolage Grotesque";cursor:pointer}
+.bigstep .nv{font:800 50px/1 "Bricolage Grotesque";letter-spacing:-.03em;min-width:74px;text-align:center}
+
+.srow2{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:13px 15px}
+.srow2 .nm{font:800 14px/1.1 "Hanken Grotesk"}
+.srow2 .sub{font:600 11px/1.3 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+.toggle{margin-left:auto;width:46px;height:27px;border-radius:999px;background:#ff6b5e;position:relative;flex:none}
+.toggle.off{background:#d8d3c6}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff}
+.toggle:not(.off)::after{left:22px}
+.minител{margin-left:auto}
+
+.fieldline{background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:13px 15px}
+.fieldline .fl{font:800 9px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:#9a9488}
+.fieldline .fv{font:800 20px/1 "Bricolage Grotesque";color:#1a1813;margin-top:7px}
+.fieldline .cur{color:#ff6b5e}
+
+.inlinestep{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:11px 13px}
+.inlinestep .nm{font:800 14px/1.1 "Hanken Grotesk"}
+.inlinestep .sub{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.inlinestep .ctrl{margin-left:auto;display:flex;align-items:center;gap:9px}
+.inlinestep .ctrl .b{width:30px;height:30px;border-radius:9px;background:#efe7da;color:#1a1813;border:0;font:800 16px/1 "Bricolage Grotesque"}
+.inlinestep .ctrl .v{font:800 18px/1 "Bricolage Grotesque";min-width:22px;text-align:center}
+
+.assign{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e6e3d9;border-radius:14px;padding:11px 13px}
+.assign .dn{width:30px;height:30px;border-radius:9px;background:#efe7da;color:#6f6c62;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";flex:none}
+.assign .nm{font:800 13.5px/1.1 "Hanken Grotesk"}
+.assign .sub{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.assign .chev{margin-left:auto;color:#c7c2b4;font-size:17px}
+
+.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.daycell{border-radius:11px;padding:8px 2px;min-height:70px;background:#fff;border:1px solid #e6e3d9;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.daycell .dd{font:800 8px/1 "Hanken Grotesk";letter-spacing:.03em;color:#9a9488}
+.daycell .dw{font:800 10px/1.05 "Bricolage Grotesque";color:#1a1813}
+.daycell .plus{color:#c7c2b4;font-size:16px;margin-top:4px}
+.daycell.rest{background:#f1ece0;border-color:#eadfce}
+.daycell.rest .dw{color:#bdb7a7}
+.daycell.assigned{background:#1a1813;border-color:#1a1813}
+.daycell.assigned .dd{color:#ff9d6a}.daycell.assigned .dw{color:#fff}
+
+.exb{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e6e3d9;border-radius:14px;padding:12px 13px}
+.exb .gr{color:#c7c2b4;font-size:16px}
+.exb .nm{font:800 14px/1.1 "Hanken Grotesk"}
+.exb .pr{font:700 11.5px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+.exb .pr b{color:#b4442e}
+.exb .chev{margin-left:auto;color:#c7c2b4;font-size:16px}
+.addex{border:1.5px dashed #cdc8ba;border-radius:14px;padding:13px;text-align:center;font:800 13px/1 "Hanken Grotesk";color:#9a9488}
+.ssgroup{background:#faf3e8;border:1px solid #efe4d2;border-radius:16px;padding:9px 9px 10px;display:flex;flex-direction:column;gap:8px}
+.ssgroup .sslabel{font:800 8.5px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:#b4442e;padding:3px 3px 1px}
+
+.cta{width:100%;background:#ff6b5e;color:#2a0b07;border:0;border-radius:14px;padding:14px;font:800 15px/1 "Hanken Grotesk";cursor:pointer;margin-top:auto}
+.rev{display:flex;justify-content:space-between;padding:9px 2px;border-bottom:1px solid #eae4d6;font:700 12.5px/1 "Hanken Grotesk"}
+.rev span:last-child{color:#1a1813;font-weight:800}.rev span:first-child{color:#8a867b}
+
+.handle{flex:none;display:flex;justify-content:center;padding:4px 0 9px}
+.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+.foot{max-width:76ch;margin:30px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}
+.foot b{color:var(--ink)}
+.anim{opacity:0}
+@media (prefers-reduced-motion:reduce){.anim{opacity:1!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Mesocycle builder &middot; round one</span>
+  <h1>Building a block, three flows</h1>
+  <p class="lede">A mesocycle is a multi-week training block: <b>name it</b>, set <b>training weeks + deload</b>, choose <b>days per week and assign a routine</b> to each, then review. Three ways to structure that, plus the <b>day builder</b> where a routine's exercises and set/rep/RIR targets are composed. New language throughout.</p>
+  <div class="bar"><button class="btn" id="replay">&#8635; Replay motion</button><span class="note">Numbers stay engine-driven (progression is RP-style) &middot; reduced-motion safe</span></div>
+
+  <div class="grid">
+
+    <!-- P1 stepped wizard -->
+    <div class="col">
+      <div class="tag">P1 &middot; Stepped wizard<span>One decision per screen with a progress rail. Least overwhelming for a first-time block; more taps.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="bk">&lsaquo;</span><span class="t">New mesocycle</span><span class="r2">Step 2 / 4</span></div>
+        <div class="body">
+          <div class="steprail anim"><span class="sp done">Name</span><span class="ln done"></span><span class="sp cur">Weeks</span><span class="ln"></span><span class="sp">Days</span><span class="ln"></span><span class="sp">Review</span></div>
+          <div class="panelc anim">
+            <div class="pk">Training weeks</div>
+            <div class="ps">7 weeks total with the deload</div>
+            <div class="bigstep"><button class="sx">&minus;</button><span class="nv">6</span><button class="sx">+</button></div>
+          </div>
+          <div class="srow2 anim"><div><div class="nm">Deload week</div><div class="sub">Week 7 at ~50% volume</div></div><span class="toggle"></span></div>
+          <div class="srow2 anim"><div><div class="nm">Advance by completion</div><div class="sub">Progress once you hit targets</div></div><span class="toggle"></span></div>
+          <button class="cta anim">Next: days &rarr;</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- P2 single scroll -->
+    <div class="col">
+      <div class="tag">P2 &middot; Single-scroll setup<span>Everything on one page with a sticky create button. Fastest for a returning user who knows the shape.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="bk">&lsaquo;</span><span class="t">New mesocycle</span></div>
+        <div class="body">
+          <div class="fieldline anim"><div class="fl">Name</div><div class="fv">Hypertrophy Block 3</div></div>
+          <div class="inlinestep anim"><div><div class="nm">Training weeks</div><div class="sub">7 total with deload</div></div><div class="ctrl"><button class="b">&minus;</button><span class="v">6</span><button class="b">+</button></div></div>
+          <div class="srow2 anim"><div><div class="nm">Deload week</div><div class="sub">~50% volume</div></div><span class="toggle"></span></div>
+          <div class="inlinestep anim"><div><div class="nm">Days per week</div><div class="sub">assign a routine to each</div></div><div class="ctrl"><button class="b">&minus;</button><span class="v">4</span><button class="b">+</button></div></div>
+          <div class="sech anim">Assign routines</div>
+          <div class="assign anim"><div class="dn">D1</div><div><div class="nm">Push A</div><div class="sub">6 lifts</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="assign anim"><div class="dn">D2</div><div><div class="nm">Legs A</div><div class="sub">6 lifts</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="assign anim"><div class="dn">D3</div><div><div class="nm">Pull A</div><div class="sub">7 lifts</div></div><span class="chev">&rsaquo;</span></div>
+          <button class="cta anim">Create mesocycle</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- P3 week grid / calendar -->
+    <div class="col">
+      <div class="tag">P3 &middot; Week canvas<span>Build the week visually: tap a day to drop a routine on it. Rest days are explicit. Most spatial.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="bk">&lsaquo;</span><span class="t">Hypertrophy Block 3</span><span class="r2">6 wk &middot; deload</span></div>
+        <div class="body">
+          <div class="sech anim">Weekly split &middot; tap a day to assign</div>
+          <div class="daygrid anim">
+            <div class="daycell assigned"><div class="dd">MON</div><div class="dw">Push A</div></div>
+            <div class="daycell assigned"><div class="dd">TUE</div><div class="dw">Legs A</div></div>
+            <div class="daycell rest"><div class="dd">WED</div><div class="dw">rest</div></div>
+            <div class="daycell assigned"><div class="dd">THU</div><div class="dw">Pull A</div></div>
+            <div class="daycell rest"><div class="dd">FRI</div><div class="dw">rest</div></div>
+            <div class="daycell assigned"><div class="dd">SAT</div><div class="dw">Upper B</div></div>
+            <div class="daycell"><div class="dd">SUN</div><span class="plus">+</span></div>
+          </div>
+          <div class="panelc anim">
+            <div class="pk">Block settings</div>
+            <div class="rev" style="margin-top:8px"><span>Training weeks</span><span>6</span></div>
+            <div class="rev"><span>Deload</span><span>Week 7 &middot; ~50%</span></div>
+            <div class="rev" style="border:0"><span>Sessions / week</span><span>4</span></div>
+          </div>
+          <button class="cta anim">Save block</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- P4 day builder (shared) -->
+    <div class="col">
+      <div class="tag">P4 &middot; Day builder <em>(shared)</em><span>How a routine/day is composed: exercises with set &times; rep-range @ RIR targets, supersets, reorder. Used by every flow above.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="bk">&lsaquo;</span><span class="t">Legs A</span><span class="r2">Save</span></div>
+        <div class="body">
+          <div class="sech anim">5 exercises &middot; ~52 min</div>
+          <div class="exb anim"><span class="gr">&#8942;&#8942;</span><div><div class="nm">Back Squat</div><div class="pr">4 &times; 6-8 &middot; <b>@2 RIR</b></div></div><span class="chev">&rsaquo;</span></div>
+          <div class="ssgroup anim">
+            <div class="sslabel">&#8651; Superset</div>
+            <div class="exb"><span class="gr">&#8942;&#8942;</span><div><div class="nm">Leg Press</div><div class="pr">4 &times; 10-12 &middot; <b>@2</b></div></div><span class="chev">&rsaquo;</span></div>
+            <div class="exb"><span class="gr">&#8942;&#8942;</span><div><div class="nm">Seated Leg Curl</div><div class="pr">3 &times; 12 &middot; <b>@1</b></div></div><span class="chev">&rsaquo;</span></div>
+          </div>
+          <div class="exb anim"><span class="gr">&#8942;&#8942;</span><div><div class="nm">Hack Squat</div><div class="pr">3 &times; 10 &middot; <b>@2</b></div></div><span class="chev">&rsaquo;</span></div>
+          <div class="exb anim"><span class="gr">&#8942;&#8942;</span><div><div class="nm">Calf Raise</div><div class="pr">4 &times; 12 &middot; <b>@1</b></div></div><span class="chev">&rsaquo;</span></div>
+          <div class="addex anim">+ Add exercise</div>
+          <button class="cta anim">Save routine</button>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <b>Tools, reconciled:</b> design-review backs <b>P1</b> for first-time clarity (one decision per screen, visible progress, Nielsen #1) but notes a returning user will resent the taps, so it wants <b>P2</b> reachable too. impeccable warns the week canvas (P3) is the slop-risk, a calendar can turn generic, and says keep it only if the day cells stay chunky and the rest days read as a deliberate choice. Verdict: ship <b>P1 for the first block, P2 for edits</b> (same data, two depths), with <b>P3 as an optional visual view</b>. <b>P4</b> is shared and locked regardless. Pick and I'll converge + add the build micro-interactions (assigning a day, adding an exercise).
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function play(){
+    document.querySelectorAll('.phone').forEach(function(ph){
+      var items=ph.querySelectorAll('.anim');
+      if(RM){gsap.set(items,{opacity:1});return;}
+      gsap.fromTo(items,{opacity:0,y:16},{opacity:1,y:0,duration:.5,stagger:{each:.07,amount:.55},ease:'expo.out',clearProps:'transform'});
+    });
+  }
+  document.getElementById('replay').addEventListener('click',play);
+  window.addEventListener('load',play); play();
+})();
+</script>

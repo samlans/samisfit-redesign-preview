@@ -1,0 +1,263 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lift Page Flow</title>
+<style>
+/* ============================================================
+   SamsisFit - "Lift" main page (renamed from Plan), interactive.
+   S1 launcher + Build/Empty/Templates, tap a routine -> Start/Edit,
+   tap Build -> Routine/Mesocycle, tap avatar -> Settings/Progress.
+   Swappable pop-up + parallax animation system. GSAP.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --under:#dc3b2e;--mid:#e8a21a;--good:#3fa65a;
+  --shadow:0 30px 70px -30px rgba(20,18,12,.6);color-scheme:light;--e-expo:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 30px 70px -26px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 30px 70px -26px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:40px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,44px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:13px 0 10px;text-wrap:balance}
+.lede{max-width:64ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.controls{display:flex;flex-direction:column;gap:10px;margin:22px 0 2px}
+.ctl-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctl-label{font:800 10px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.sbtn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer}
+.sbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hint{font-size:12.5px;color:var(--muted)}.hint b{color:var(--ink)}
+.stage-wrap{display:flex;justify-content:center;margin-top:24px}
+
+.phone{width:100%;max-width:372px;aspect-ratio:9/19.5;border-radius:40px;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08);overflow:hidden;background:#000}
+.device{position:absolute;inset:0;overflow:hidden;background:#efece3;color:#1b1a17;border-radius:40px}
+.px{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;transform-origin:50% 0%;will-change:transform,filter}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:12px 22px 2px;font-size:11.5px;font-weight:700;flex:none}
+.sb .r{font-size:10px;opacity:.85}
+.zonebar{position:relative;display:flex;gap:4px;padding:8px 16px 6px;flex:none}
+.zone{flex:1;background:none;border:0;cursor:pointer;padding:8px 4px 11px;font:800 13px/1 "Hanken Grotesk";color:#9a9488}
+.zone[aria-current="true"]{color:#1b1a17}
+.zind{position:absolute;bottom:4px;height:3px;border-radius:999px;background:#ff6b5e;transition:.3s var(--e-expo)}
+.av{position:absolute;top:10px;right:16px;width:30px;height:30px;border-radius:50%;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 12px/1 "Bricolage Grotesque";cursor:pointer;z-index:4}
+
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;padding:4px 13px 12px;overflow:hidden}
+.sech{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;color:#9a9488;padding:5px 2px 0}
+.hero{background:#1a1813;color:#fff;border-radius:22px;padding:17px;position:relative;overflow:hidden}
+.hero .k{font:800 10px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:#ff9d6a}
+.hero .nm{font:800 31px/1 "Bricolage Grotesque";letter-spacing:-.025em;margin:8px 0 4px}
+.hero .meta{font:600 12px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.66)}
+.wk{display:flex;gap:5px;margin:13px 0 2px}
+.wk .c{flex:1;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:800 10px/1 "Bricolage Grotesque";background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
+.wk .c.done{background:#bfe39a;color:#243800}.wk .c.today{background:#ff6b5e;color:#2a0b07}
+.go{margin-top:14px;width:100%;background:#ff6b5e;color:#2a0b07;border:0;border-radius:14px;padding:14px;font:800 15px/1 "Hanken Grotesk";cursor:pointer}
+.rrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e6e3d9;border-radius:16px;padding:13px;cursor:pointer}
+.rrow:active{transform:scale(.99)}
+.rrow .ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 13px/1 "Bricolage Grotesque";flex:none}
+.rrow .ic.p{background:#ffe0d8;color:#b4442e}.rrow .ic.u{background:#dfeaf6;color:#375c86}.rrow .ic.l{background:#e9f3d2;color:#4b7a00}
+.rrow .nm{font:800 15px/1.1 "Hanken Grotesk"}
+.rrow .sub{font:600 11.5px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+.rrow .chev{margin-left:auto;color:#c7c2b4;font-size:18px}
+.quick{display:flex;gap:9px;margin-top:auto}
+.qa{flex:1;background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:13px;text-align:center;cursor:pointer}
+.qa:active{transform:scale(.97)}
+.qa .qi{font-size:17px}.qa .ql{font:800 12px/1.1 "Hanken Grotesk";margin-top:6px}.qa .qs{font:600 10px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+
+/* ---- popup system ---- */
+.scrim{position:absolute;inset:0;background:rgba(20,18,12,.52);opacity:0;visibility:hidden;z-index:20}
+.scrim.blur{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#efece3;border-radius:26px 26px 0 0;padding:14px 16px 20px;z-index:30;visibility:hidden;box-shadow:0 -24px 60px -24px rgba(0,0,0,.45)}
+.sheet.center{left:18px;right:18px;bottom:auto;top:50%;border-radius:24px;padding:20px 18px}
+.grab{width:42px;height:4px;border-radius:999px;background:#d3cdbf;margin:0 auto 14px}
+.shh{font:800 21px/1 "Bricolage Grotesque";letter-spacing:-.02em;text-align:center}
+.shs{font:600 12.5px/1.3 "Hanken Grotesk";color:#8a867b;text-align:center;margin:5px 0 15px}
+.sopt{width:100%;background:#fff;border:1px solid #e6e3d9;border-radius:16px;padding:15px;text-align:left;font:800 16px/1.1 "Hanken Grotesk";color:#1a1813;display:flex;flex-direction:column;gap:4px;cursor:pointer;margin-bottom:9px}
+.sopt small{font:600 12px/1.3 "Hanken Grotesk";color:#8a867b}
+.sopt:active{transform:scale(.985)}
+.sopt.primary{background:#ff6b5e;color:#2a0b07;border-color:#ff6b5e}.sopt.primary small{color:#5c1a10}
+.srow{display:flex;gap:9px;margin-top:3px}
+.ssm{flex:1;background:none;border:1px solid #e6e3d9;border-radius:12px;padding:11px;font:800 12px/1 "Hanken Grotesk";color:#6f6c62;cursor:pointer}
+.ssm.danger{color:#dc3b2e;border-color:#f0cfc9}
+.cancel{width:100%;background:none;border:0;padding:12px;font:800 13px/1 "Hanken Grotesk";color:#8a867b;cursor:pointer;margin-top:4px}
+
+.toast{position:absolute;left:50%;top:58px;transform:translateX(-50%);z-index:40;opacity:0;font:800 10px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase;color:#243800;background:#bfe39a;padding:8px 13px;border-radius:999px;pointer-events:none;white-space:nowrap}
+.handle{flex:none;display:flex;justify-content:center;padding:4px 0 9px}
+.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+.foot{max-width:64ch;margin:28px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}.foot b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Lift page + pop-up system</span>
+  <h1>Lift: start, build, and the pop-ups</h1>
+  <p class="lede">The main page (renamed <b>Lift</b>). Tap a <b>routine</b> to get Start or Edit; tap <b>Build</b> to choose Routine or Mesocycle; tap the <b>S avatar</b> for Settings or Progress. Switch the <b>pop-up style</b> to feel different entrance + parallax treatments. Everything here is tappable.</p>
+
+  <div class="controls">
+    <div class="ctl-row">
+      <span class="ctl-label">Pop-up style</span>
+      <button class="sbtn" data-anim="sheet" aria-pressed="true">Bottom sheet + dim</button>
+      <button class="sbtn" data-anim="push" aria-pressed="false">Push parallax</button>
+      <button class="sbtn" data-anim="pop" aria-pressed="false">Center pop + blur</button>
+      <button class="sbtn" data-anim="radial" aria-pressed="false">Radial reveal</button>
+    </div>
+    <div class="ctl-row"><span class="hint" id="aHint"><b>Bottom sheet + dim:</b> the sheet rises; the page behind dims and eases back. The iOS-calm default.</span></div>
+  </div>
+
+  <div class="stage-wrap">
+    <div class="phone"><div class="device" id="device">
+      <div class="px" id="px">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="zonebar" id="zonebar">
+          <button class="zone">Your Day</button>
+          <button class="zone">Eat</button>
+          <button class="zone" aria-current="true">Lift</button>
+          <span class="zind" id="zind"></span>
+        </div>
+        <span class="av" id="avatar">S</span>
+        <div class="body">
+          <div class="hero">
+            <div class="k">Today &middot; Mesocycle 3 &middot; W2</div>
+            <div class="nm">Legs A</div>
+            <div class="meta">6 exercises &middot; ~52 min &middot; Quads focus</div>
+            <div class="wk"><div class="c done">1</div><div class="c today">2</div><div class="c">3</div><div class="c">4</div></div>
+            <button class="go" data-toast="Opening today's workout">Start today's workout &rarr;</button>
+          </div>
+          <div class="sech">Your routines</div>
+          <div class="rrow" data-routine="Push A"><div class="ic p">PS</div><div><div class="nm">Push A</div><div class="sub">6 lifts &middot; Chest, Shoulders, Tris</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="rrow" data-routine="Pull A"><div class="ic u">PL</div><div><div class="nm">Pull A</div><div class="sub">7 lifts &middot; Back, Bis</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="rrow" data-routine="Upper B"><div class="ic l">UB</div><div><div class="nm">Upper B</div><div class="sub">6 lifts &middot; Chest, Back</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="quick">
+            <div class="qa" id="buildBtn"><div class="qi">&#9874;</div><div class="ql">Build</div><div class="qs">Routine or block</div></div>
+            <div class="qa" data-toast="Empty workout started"><div class="qi">+</div><div class="ql">Empty</div><div class="qs">Freestyle</div></div>
+            <div class="qa" data-toast="Browsing templates"><div class="qi">&#9633;</div><div class="ql">Templates</div><div class="qs">Browse</div></div>
+          </div>
+        </div>
+        <div class="handle"><span></span></div>
+      </div>
+      <span class="toast" id="toast">Done</span>
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet" id="sheet"></div>
+    </div></div>
+  </div>
+
+  <div class="foot">
+    The pop-up system is shared: routine actions, Build, and the avatar menu all use the same component, so every "pick an option" moment feels identical. Tell me which <b>style</b> wins (or a couple to keep) and I'll lock it, then wire the real destinations (editor, builder, settings, progress).
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var anim='sheet', openNow=false, lastTap={x:186,y:400};
+  var $=function(id){return document.getElementById(id);};
+  var device=$('device'), px=$('px'), scrim=$('scrim'), sheet=$('sheet');
+  var hints={
+    sheet:'<b>Bottom sheet + dim:</b> the sheet rises; the page behind dims and eases back. The iOS-calm default.',
+    push:'<b>Push parallax:</b> the page is pushed up and back harder as the sheet takes over. More physical depth.',
+    pop:'<b>Center pop + blur:</b> a centred card springs in over a blurred page. Best for a short either/or choice.',
+    radial:'<b>Radial reveal:</b> the sheet grows out of exactly what you tapped, echoing our screen-transition flash.'
+  };
+
+  function toast(msg){ var t=$('toast'); t.textContent=msg; if(RM) return;
+    gsap.killTweensOf(t); gsap.fromTo(t,{autoAlpha:0,y:-6},{autoAlpha:1,y:0,duration:.22,ease:'power2.out'});
+    gsap.to(t,{autoAlpha:0,duration:.3,delay:.9,ease:'power2.in'}); }
+
+  function positionSheet(){
+    sheet.classList.toggle('center', anim==='pop');
+    if(anim==='pop'){ gsap.set(sheet,{yPercent:-50}); } else { gsap.set(sheet,{yPercent:0}); }
+    gsap.set(sheet,{clipPath:'none',scale:1,autoAlpha:1,x:0,y:0});
+    scrim.classList.toggle('blur', anim==='pop');
+  }
+
+  function openSheet(html){
+    if(openNow) return; openNow=true;
+    sheet.innerHTML = (anim==='pop'?'':'<div class="grab"></div>') + html + '<button class="cancel" data-close="1">Cancel</button>';
+    wireSheet();
+    sheet.style.visibility='visible'; scrim.style.visibility='visible';
+    positionSheet();
+    if(RM){ gsap.set(scrim,{opacity:1}); gsap.set(sheet,{autoAlpha:1}); return; }
+    var tl=gsap.timeline();
+    if(anim==='sheet'){
+      tl.to(scrim,{opacity:1,duration:.3},0)
+        .to(px,{scale:.95,y:8,filter:'brightness(.82)',duration:.5,ease:'expo.out'},0)
+        .fromTo(sheet,{yPercent:100},{yPercent:0,duration:.5,ease:'expo.out'},0.02)
+        .fromTo(sheet.querySelectorAll('.sopt'),{autoAlpha:0,y:12},{autoAlpha:1,y:0,duration:.4,stagger:.06,ease:'expo.out'},0.2);
+    } else if(anim==='push'){
+      tl.to(scrim,{opacity:1,duration:.3},0)
+        .to(px,{scale:.9,y:-20,filter:'brightness(.78)',duration:.55,ease:'expo.out'},0)
+        .fromTo(sheet,{yPercent:100},{yPercent:0,duration:.55,ease:'expo.out'},0.04)
+        .fromTo(sheet.querySelectorAll('.sopt'),{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.42,stagger:.06,ease:'expo.out'},0.24);
+    } else if(anim==='pop'){
+      tl.to(scrim,{opacity:1,duration:.3},0)
+        .to(px,{scale:.98,filter:'brightness(.9)',duration:.4,ease:'expo.out'},0)
+        .fromTo(sheet,{scale:.88,autoAlpha:0,yPercent:-50},{scale:1,autoAlpha:1,yPercent:-50,duration:.44,ease:'back.out(1.4)'},0.02)
+        .fromTo(sheet.querySelectorAll('.sopt'),{autoAlpha:0,y:10},{autoAlpha:1,y:0,duration:.38,stagger:.06,ease:'expo.out'},0.18);
+    } else if(anim==='radial'){
+      var sr=sheet.getBoundingClientRect();
+      var ox=((lastTap.x-sr.left)/sr.width*100), oy=((lastTap.y-sr.top)/sr.height*100);
+      var maxR=Math.hypot(Math.max(ox,100-ox),Math.max(oy,100-oy))*1.2;
+      tl.to(scrim,{opacity:1,duration:.3},0)
+        .to(px,{scale:.96,filter:'brightness(.85)',duration:.5,ease:'expo.out'},0)
+        .fromTo(sheet,{clipPath:'circle(0% at '+ox+'% '+oy+'%)'},{clipPath:'circle('+maxR+'% at '+ox+'% '+oy+'%)',duration:.56,ease:'power3.out'},0.02)
+        .fromTo(sheet.querySelectorAll('.sopt'),{autoAlpha:0,y:12},{autoAlpha:1,y:0,duration:.4,stagger:.06,ease:'expo.out'},0.22);
+    }
+  }
+  function closeSheet(){
+    if(!openNow) return;
+    function done(){ sheet.style.visibility='hidden'; scrim.style.visibility='hidden'; openNow=false;
+      gsap.set(px,{clearProps:'all'}); gsap.set(sheet,{clearProps:'all'}); }
+    if(RM){ gsap.set([scrim,sheet],{autoAlpha:0}); gsap.set(px,{clearProps:'all'}); done(); return; }
+    var tl=gsap.timeline({onComplete:done});
+    tl.to(px,{scale:1,y:0,filter:'brightness(1)',duration:.4,ease:'expo.out'},0)
+      .to(scrim,{opacity:0,duration:.32},0);
+    if(anim==='pop'){ tl.to(sheet,{scale:.9,autoAlpha:0,yPercent:-50,duration:.3,ease:'power2.in'},0); }
+    else { tl.to(sheet,{yPercent:100,duration:.36,ease:'power3.in'},0); }
+  }
+
+  function wireSheet(){
+    [].forEach.call(sheet.querySelectorAll('[data-act]'),function(b){
+      b.addEventListener('click',function(){ toast(b.dataset.act); closeSheet(); });
+    });
+    [].forEach.call(sheet.querySelectorAll('[data-close]'),function(b){ b.addEventListener('click',closeSheet); });
+  }
+
+  function routineSheet(name){
+    return '<div class="shh">'+name+'</div><div class="shs">Routine &middot; 6 exercises</div>'
+      +'<button class="sopt primary" data-act="Starting '+name+'">Start workout<small>Log this routine now</small></button>'
+      +'<button class="sopt" data-act="Editing '+name+'">Edit routine<small>Change exercises, sets, targets</small></button>'
+      +'<div class="srow"><button class="ssm" data-act="Duplicated '+name+'">Duplicate</button><button class="ssm danger" data-act="Deleted '+name+'">Delete</button></div>';
+  }
+  function buildSheet(){
+    return '<div class="shh">Build</div><div class="shs">What do you want to create?</div>'
+      +'<button class="sopt primary" data-act="New routine">Routine<small>A single training day of exercises</small></button>'
+      +'<button class="sopt" data-act="New mesocycle">Mesocycle<small>A multi-week block with progression</small></button>';
+  }
+  function avatarSheet(){
+    return '<div class="shh">Sam Lans</div><div class="shs">Intermediate &middot; 128 sessions</div>'
+      +'<button class="sopt" data-act="Opening progress">Progress &amp; stats<small>Strength gains, volume, consistency</small></button>'
+      +'<button class="sopt" data-act="Opening settings">Settings<small>Devices, units, account, notifications</small></button>';
+  }
+
+  // wire triggers
+  document.addEventListener('click',function(e){
+    var r=e.target.closest('[data-routine]'); var t=e.target.closest('[data-toast]');
+    if(e.clientX){ lastTap={x:e.clientX,y:e.clientY}; }
+    if(r){ openSheet(routineSheet(r.dataset.routine)); }
+    else if(t){ toast(t.dataset.toast); }
+  });
+  $('buildBtn').addEventListener('click',function(e){ lastTap={x:e.clientX,y:e.clientY}; openSheet(buildSheet()); });
+  $('avatar').addEventListener('click',function(e){ lastTap={x:e.clientX,y:e.clientY}; openSheet(avatarSheet()); });
+  scrim.addEventListener('click',closeSheet);
+  document.querySelectorAll('.sbtn[data-anim]').forEach(function(b){
+    b.addEventListener('click',function(){ anim=b.dataset.anim;
+      document.querySelectorAll('.sbtn[data-anim]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+      $('aHint').innerHTML=hints[anim]; });
+  });
+
+  // place zone indicator under "Lift"
+  function placeZ(){ var z=document.querySelectorAll('.zone')[2]; var r=z.getBoundingClientRect(), br=$('zonebar').getBoundingClientRect();
+    $('zind').style.left=(r.left-br.left+r.width*0.2)+'px'; $('zind').style.width=(r.width*0.6)+'px'; }
+  window.addEventListener('load',placeZ); placeZ();
+})();
+</script>

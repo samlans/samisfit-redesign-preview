@@ -1,0 +1,373 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flash Shapes</title>
+<style>
+/* ============================================================
+   SamsisFit - flash transition shape/colour lab
+   Two-phase sweep (colour covers, then new screen reveals from
+   the origin so the trailing edge sweeps away). Swap the EDGE
+   SHAPE and the COLOUR. GSAP-driven.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --shadow:0 30px 70px -30px rgba(20,18,12,.6);color-scheme:light;
+  --e-quart:cubic-bezier(.25,1,.5,1);--e-quint:cubic-bezier(.22,1,.36,1);--e-expo:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;
+  --line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 30px 70px -26px rgba(0,0,0,.8);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;
+  --shadow:0 30px 70px -26px rgba(0,0,0,.8);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:38px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,44px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:13px 0 10px;text-wrap:balance}
+.lede{max-width:68ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.controls{display:flex;flex-direction:column;gap:10px;margin:22px 0 6px}
+.ctl-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctl-label{font:800 10px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px;width:54px}
+.sbtn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:999px;padding:9px 15px;cursor:pointer;transition:transform .14s var(--e-quart),background .2s,border-color .2s}
+.sbtn:active{transform:scale(.95)}
+.sbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sw{width:26px;height:26px;border-radius:50%;padding:0;border:2px solid var(--chip);box-shadow:0 0 0 1px var(--line);cursor:pointer;transition:transform .14s var(--e-quart)}
+.sw:active{transform:scale(.9)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink);transform:scale(1.08)}
+.hint{font-size:12.5px;color:var(--muted)}
+.hint b{color:var(--ink)}
+.badge{font:800 10px/1 "Hanken Grotesk";letter-spacing:.08em;text-transform:uppercase;color:#b4521a;
+  background:rgba(194,59,22,.12);border:1px solid rgba(194,59,22,.3);border-radius:999px;padding:7px 11px}
+.nowplaying{position:absolute;top:50px;left:50%;transform:translateX(-50%);z-index:9;
+  font:800 10px/1 "Hanken Grotesk";letter-spacing:.08em;text-transform:uppercase;color:#fff;
+  background:rgba(26,24,19,.9);padding:7px 12px;border-radius:999px;opacity:0;pointer-events:none}
+.stage-wrap{display:flex;justify-content:center;margin-top:24px}
+
+.phone{width:100%;max-width:360px;aspect-ratio:9/19.5;border-radius:40px;position:relative;
+  box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08);overflow:hidden;background:#000}
+.device{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#efece3;color:#1b1a17;border-radius:40px}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 2px;font-size:12px;font-weight:700;flex:none;z-index:4}
+.sb .r{font-size:10.5px;opacity:.85}
+.zonebar{position:relative;flex:none;display:flex;gap:4px;padding:8px 16px 6px;z-index:5}
+.zone{flex:1;background:none;border:0;cursor:pointer;padding:8px 4px 11px;border-radius:12px;
+  font:800 13px/1 "Hanken Grotesk";letter-spacing:.01em;color:#9a9488;transition:color .25s var(--e-quart),transform .14s var(--e-quart)}
+.zone:active{transform:scale(.94)}
+.zone[aria-current="true"]{color:#1b1a17}
+.zind{position:absolute;bottom:4px;height:3px;border-radius:999px;background:#c23b16;left:0;width:60px;transform:translateX(16px);will-change:transform,width}
+.stack{position:relative;flex:1;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:4px 13px 16px;display:flex;flex-direction:column;gap:11px;background:#efece3}
+.screen[hidden]{display:none}
+.screen::-webkit-scrollbar{width:0}
+.flashdisc{position:absolute;inset:0;z-index:4;display:none;pointer-events:none}
+
+.t{border-radius:22px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:92px;position:relative;overflow:hidden;transition:transform .13s var(--e-quart)}
+.t:active{transform:scale(.975)}
+.tk{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.val{font:800 26px/1 "Bricolage Grotesque";letter-spacing:-.02em;margin-top:auto}
+.val small{font-size:11px;opacity:.55;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.coral{background:#ff6b5e;color:#2a0b07}.sky{background:#8fd3e8;color:#06252f}
+.amber{background:#ffc247;color:#2a1c00}.card{background:#fff;border:1px solid #e6e3d9}
+.daterow{display:flex;justify-content:space-between;align-items:center;padding:2px 2px 0}
+.daterow .d{font:800 22px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.daterow .me{width:30px;height:30px;border-radius:50%;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 12px/1 "Bricolage Grotesque"}
+.hero{background:#1a1813;color:#fff;border-radius:22px;padding:17px;position:relative;overflow:hidden;transition:transform .13s var(--e-quart)}
+.hero:active{transform:scale(.985)}
+.hero .htop{display:flex;justify-content:space-between;align-items:center}
+.hero .htop .tk{opacity:.7}
+.hero .wklabel{font:800 10px/1 "Hanken Grotesk";letter-spacing:.1em;color:#ff9d6a}
+.hero .tt{font:800 32px/1 "Bricolage Grotesque";letter-spacing:-.025em;margin:7px 0 3px}
+.hero .ts{font-size:12px;opacity:.68}
+.wk{display:flex;gap:5px;margin:13px 0 2px}
+.wk .c{flex:1;height:27px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
+.wk .c.done{background:#bfe39a;color:#243800}
+.wk .c.today{background:#ff6b5e;color:#2a0b07;box-shadow:0 0 0 2px rgba(255,107,94,.35)}
+.wk .c.rest{background:rgba(255,255,255,.04);color:rgba(255,255,255,.26);font-size:9px}
+.gobtn{margin-top:13px;width:100%;background:#ff6b5e;color:#2a0b07;border:0;border-radius:13px;padding:12px;font-weight:800;font-size:14px;font-family:"Hanken Grotesk";cursor:pointer;transition:transform .13s var(--e-quart)}
+.gobtn:active{transform:scale(.97)}
+.fuelbar{height:7px;border-radius:999px;background:rgba(0,0,0,.14);margin-top:9px;overflow:hidden}
+.fuelbar i{display:block;height:100%;width:62%;background:#2a0b07;border-radius:999px}
+.logged{position:absolute;top:12px;right:13px;font:800 9px/1 "Hanken Grotesk";letter-spacing:.08em;background:rgba(40,120,0,.12);color:#3c7a00;padding:5px 7px;border-radius:999px}
+.quote{padding:12px 10px 4px}
+.quote .ql{font:800 10px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercase;color:#c23b16}
+.quote blockquote{margin:9px 0 7px;font:500 italic 17px/1.4 "Newsreader",Georgia,serif;color:#7a766b}
+.quote .qa{font:800 11.5px/1 "Hanken Grotesk";color:#9a9488}
+.shead{font:800 24px/1 "Bricolage Grotesque";letter-spacing:-.02em;padding:6px 2px 0}
+.ssub{font:600 12.5px/1 "Hanken Grotesk";color:#8a867b;padding:0 2px}
+.ringwrap{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e6e3d9;border-radius:22px;padding:18px}
+.ring{width:92px;height:92px;border-radius:50%;flex:none;position:relative;background:conic-gradient(#ff6b5e 0 62%, #efe7da 62% 100%)}
+.ring::after{content:"";position:absolute;inset:11px;border-radius:50%;background:#fff}
+.ring b{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.ring .rn{font:800 23px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.ring .rl{font:700 9px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:#8a867b;margin-top:3px}
+.macros{flex:1;display:flex;flex-direction:column;gap:10px}
+.macro .ml{display:flex;justify-content:space-between;font:700 11px/1 "Hanken Grotesk";margin-bottom:5px}
+.macro .ml span:last-child{color:#8a867b}
+.mbar{height:6px;border-radius:999px;background:#efe7da;overflow:hidden}
+.mbar i{display:block;height:100%;border-radius:999px}
+.meal{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e6e3d9;border-radius:18px;padding:13px 15px;transition:transform .13s var(--e-quart)}
+.meal:active{transform:scale(.98)}
+.meal .mi{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.meal .mt{flex:1}
+.meal .mt .mn{font:800 15px/1.1 "Hanken Grotesk"}
+.meal .mt .md{font:600 12px/1.3 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+.meal .mc{font:800 15px/1 "Bricolage Grotesque";color:#1b1a17}
+.meal.ghost{background:none;border:1.5px dashed #cdc8ba;color:#9a9488}
+.meal.ghost .mc{color:#9a9488}
+.wk-item{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e6e3d9;border-radius:18px;padding:13px 15px;transition:transform .13s var(--e-quart)}
+.wk-item:active{transform:scale(.98)}
+.wk-item .dot{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font:800 13px/1 "Bricolage Grotesque";flex:none}
+.wk-item .dot.done{background:#bfe39a;color:#243800}
+.wk-item .dot.today{background:#ff6b5e;color:#2a0b07}
+.wk-item .dot.up{background:#efe7da;color:#8a867b}
+.wk-item .wt{flex:1}
+.wk-item .wt .wn{font:800 15px/1.1 "Hanken Grotesk"}
+.wk-item .wt .wd{font:600 12px/1.3 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.wk-item .wx{font:700 11px/1 "Hanken Grotesk";color:#8a867b}
+.volcard{background:#1a1813;color:#fff;border-radius:22px;padding:17px}
+.volcard .tk{opacity:.6}
+.volbars{display:flex;align-items:flex-end;gap:7px;height:66px;margin-top:12px}
+.volbars i{flex:1;background:#8fd3e8;border-radius:6px 6px 0 0;opacity:.9}
+.handle{flex:none;display:flex;justify-content:center;padding:5px 0 9px;background:#efece3;z-index:4}
+.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+.foot{max-width:68ch;margin:28px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}
+.foot b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Flash transition &middot; shapes + colour</span>
+  <h1>Spinning the flash: shapes and colours</h1>
+  <p class="lede">Same two-phase sweep you liked (colour covers, then the new screen reveals from the origin so the trailing edge keeps sweeping and tiles pop in behind it). Now the <b>edge shape</b> and the <b>colour</b> are swappable. Tap a zone to fire it. Colour defaults to <b>Sunset</b> (the pick); the other palettes stay here for later. Rings, angled and ripple each treat the trailing edge differently.</p>
+
+  <div class="controls">
+    <div class="ctl-row">
+      <span class="ctl-label">Shape</span>
+      <button class="sbtn" data-shape="radial" aria-pressed="true">Radial</button>
+      <button class="sbtn" data-shape="rings" aria-pressed="false">Trailing rings</button>
+      <button class="sbtn" data-shape="angled" aria-pressed="false">Angled flat</button>
+      <button class="sbtn" data-shape="ripple" aria-pressed="false">Ripple</button>
+    </div>
+    <div class="ctl-row">
+      <span class="ctl-label">Colour</span>
+      <button class="sbtn" data-color="zone" aria-pressed="false">Per-zone</button>
+      <button class="sw" data-color="coral" style="background:#ff6b5e" title="Coral (flat)"></button>
+      <button class="sw" data-color="lime" style="background:#bfe84a" title="Lime (flat)"></button>
+      <button class="sw" data-color="violet" style="background:#b69cff" title="Violet (flat)"></button>
+      <button class="sw" data-color="teal" style="background:#4fd6c4" title="Teal (flat)"></button>
+      <button class="sw" data-color="sunset" aria-pressed="true" style="background:linear-gradient(135deg,#ff8a4c,#e23a6d)" title="Sunset"></button>
+      <button class="sw" data-color="aurora" style="background:linear-gradient(135deg,#36d6c0,#6c5cff)" title="Aurora"></button>
+      <button class="sw" data-color="ember" style="background:linear-gradient(135deg,#ffc247,#e23a2f)" title="Ember"></button>
+      <button class="sw" data-color="grape" style="background:linear-gradient(135deg,#ff6b9d,#7b3ff2)" title="Grape"></button>
+      <button class="sw" data-color="dusk" style="background:linear-gradient(135deg,#ffb24c,#7b3ff2)" title="Dusk"></button>
+    </div>
+    <div class="ctl-row">
+      <button class="sbtn" id="stag" aria-pressed="true">Content stagger</button>
+      <button class="sbtn" id="replay">&#8635; Replay load</button>
+      <button class="sbtn" id="force" aria-pressed="false">Force motion</button>
+      <button class="sbtn" id="slow" aria-pressed="false">Slow-mo</button>
+      <span class="badge" id="rmBadge" hidden>Reduced-motion detected</span>
+    </div>
+    <div class="ctl-row"><span class="hint" id="sHint"><b>Radial:</b> circle from the tapped chip. Deep centre, lighter rim.</span></div>
+  </div>
+
+  <div class="stage-wrap">
+    <div class="phone"><div class="device">
+      <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+      <div class="zonebar" id="zonebar">
+        <button class="zone" data-screen="yourday" aria-current="true">Your Day</button>
+        <button class="zone" data-screen="eat" aria-current="false">Eat</button>
+        <button class="zone" data-screen="plan" aria-current="false">Plan</button>
+        <span class="zind" id="zind"></span>
+      </div>
+      <div class="stack" id="stack">
+        <span class="nowplaying" id="nowplaying">Radial</span>
+        <span class="flashdisc" id="flashdisc"></span>
+
+        <section class="screen" id="yourday">
+          <div class="daterow st"><span class="d">Thu, Oct 1</span><span class="me">S</span></div>
+          <div class="hero st">
+            <div class="htop"><span class="tk">Up next</span><span class="wklabel">WEEK 2 OF 6</span></div>
+            <div class="tt">Legs A</div>
+            <div class="ts">6 exercises &middot; ~52 min</div>
+            <div class="wk"><div class="c done">1</div><div class="c today">2</div><div class="c">3</div><div class="c rest">rest</div><div class="c">5</div><div class="c">6</div></div>
+            <button class="gobtn">Start workout &rarr;</button>
+          </div>
+          <div class="row2">
+            <div class="t coral st"><div class="tk">Calories left</div><div class="val">1,502<small> of 2,400</small></div><div class="fuelbar"><i></i></div></div>
+            <div class="t card st"><span class="logged">&check; LOGGED</span><div class="tk">Weight</div><div class="val">148.0<small> lb</small></div></div>
+            <div class="t amber st"><div class="tk">Meals</div><div class="val">0<small>/3</small></div></div>
+            <div class="t sky st"><div class="tk">Steps</div><div class="val">4,210<small>/8k</small></div></div>
+          </div>
+          <div class="quote st"><span class="ql">Quote of the day</span><blockquote>"The last three or four reps is what makes the muscle grow."</blockquote><span class="qa">Arnold Schwarzenegger</span></div>
+        </section>
+
+        <section class="screen" id="eat" hidden>
+          <div class="shead st">Today's fuel</div>
+          <div class="ssub st" style="margin-bottom:4px">Thursday &middot; 898 of 2,400 kcal eaten</div>
+          <div class="ringwrap st">
+            <div class="ring"><b><span class="rn">1,502</span><span class="rl">left</span></b></div>
+            <div class="macros">
+              <div class="macro"><div class="ml"><span>Protein</span><span>88 / 165 g</span></div><div class="mbar"><i style="width:53%;background:#ff6b5e"></i></div></div>
+              <div class="macro"><div class="ml"><span>Carbs</span><span>96 / 240 g</span></div><div class="mbar"><i style="width:40%;background:#ffc247"></i></div></div>
+              <div class="macro"><div class="ml"><span>Fat</span><span>24 / 70 g</span></div><div class="mbar"><i style="width:34%;background:#8fd3e8"></i></div></div>
+            </div>
+          </div>
+          <div class="meal st"><div class="mi" style="background:#ffe9c2">&#127859;</div><div class="mt"><div class="mn">Breakfast</div><div class="md">Oats, whey, banana</div></div><div class="mc">612</div></div>
+          <div class="meal st"><div class="mi" style="background:#ffd9d4">&#127831;</div><div class="mt"><div class="mn">Lunch</div><div class="md">Chicken, rice, greens</div></div><div class="mc">286</div></div>
+          <div class="meal ghost st"><div class="mi" style="background:#efe7da">+</div><div class="mt"><div class="mn">Dinner</div><div class="md">Tap to plan or log</div></div><div class="mc">&mdash;</div></div>
+        </section>
+
+        <section class="screen" id="plan" hidden>
+          <div class="shead st">This week</div>
+          <div class="ssub st" style="margin-bottom:4px">Mesocycle 3 &middot; Week 2 of 6</div>
+          <div class="wk-item st"><div class="dot done">1</div><div class="wt"><div class="wn">Push A</div><div class="wd">Completed Mon</div></div><div class="wx">6 lifts</div></div>
+          <div class="wk-item st"><div class="dot today">2</div><div class="wt"><div class="wn">Legs A</div><div class="wd">Today &middot; ~52 min</div></div><div class="wx">6 lifts</div></div>
+          <div class="wk-item st"><div class="dot up">3</div><div class="wt"><div class="wn">Pull A</div><div class="wd">Fri</div></div><div class="wx">7 lifts</div></div>
+          <div class="wk-item st"><div class="dot up">4</div><div class="wt"><div class="wn">Upper B</div><div class="wd">Sat</div></div><div class="wx">6 lifts</div></div>
+          <div class="volcard st"><div class="tk">Weekly volume vs target</div><div class="volbars"><i style="height:70%"></i><i style="height:52%"></i><i style="height:88%"></i><i style="height:61%"></i><i style="height:44%"></i><i style="height:76%"></i></div></div>
+        </section>
+      </div>
+      <div class="handle"><span></span></div>
+    </div></div>
+  </div>
+
+  <div class="foot">Every option keeps the two-phase reveal. <b>Radial / rings</b> originate at the tapped chip; <b>angled / ripple</b> sweep top-to-bottom with a shaped trailing edge. Colour is locked to <b>Sunset</b>; the rest are parked for future screens. Tell me the shape you want and I'll bake it into the hub.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var rmQuery=matchMedia('(prefers-reduced-motion: reduce)');
+  var force=false; function RMon(){return rmQuery.matches && !force;}
+  gsap.config({force3D:true});
+  var order=['yourday','eat','plan'];
+  var current='yourday', shape='radial', colorKey='sunset', staggerOn=true, animating=false, lastTap=null;
+  var accents={yourday:{base:'#ff6b5e',deep:'#d8402f'},eat:{base:'#ffc247',deep:'#e39a0c'},plan:{base:'#8fd3e8',deep:'#3f9ec0'}};
+  var palettes={
+    coral:{base:'#ff6b5e',deep:'#d8402f'},         // flat solids
+    lime:{base:'#bfe84a',deep:'#7fab00'},
+    violet:{base:'#b69cff',deep:'#6c3fd6'},
+    teal:{base:'#4fd6c4',deep:'#138f80'},
+    sunset:{grad:['#ff8a4c','#e23a6d']},            // gradients
+    aurora:{grad:['#36d6c0','#6c5cff']},
+    ember:{grad:['#ffc247','#e23a2f']},
+    grape:{grad:['#ff6b9d','#7b3ff2']},
+    dusk:{grad:['#ffb24c','#7b3ff2']}
+  };
+  var sNames={radial:'Radial',rings:'Trailing rings',angled:'Angled flat',ooze:'Ooze',ripple:'Ripple'};
+  var hints={
+    radial:'<b>Radial:</b> circle from the tapped chip. Deep centre, lighter rim.',
+    rings:'<b>Trailing rings:</b> the receding colour breaks into concentric rings behind the reveal.',
+    angled:'<b>Angled flat:</b> a straight diagonal edge sweeps top-to-bottom.',
+    ooze:'<b>Ooze:</b> a thick, slow, organic wobble, like paint sliding down.',
+    ripple:'<b>Ripple:</b> a fine high-frequency wave rolling down the edge.'
+  };
+  var DIRS=[{x:-34,y:4},{y:30},{x:34,y:4},{x:-30,y:0},{y:28},{x:30,y:4},{y:26,s:.95}];
+  function fromX(i){return DIRS[i%DIRS.length].x||0;} function fromY(i){return DIRS[i%DIRS.length].y||0;}
+  function fromS(i){return DIRS[i%DIRS.length].s||1;}
+  var stack=document.getElementById('stack'), zind=document.getElementById('zind'),
+      zonebar=document.getElementById('zonebar'), disc=document.getElementById('flashdisc');
+  var zones=Array.prototype.slice.call(document.querySelectorAll('.zone'));
+  function el(id){return document.getElementById(id);}
+  function kids(s){return s.querySelectorAll('.st');}
+  function palFor(to){return colorKey==='zone'?{base:accents[to].base,deep:accents[to].deep}:palettes[colorKey];}
+  function indColorFor(to){var p=palFor(to);return p.grad?p.grad[0]:p.base;}
+
+  function flashNow(){var np=el('nowplaying');np.textContent=sNames[shape];gsap.killTweensOf(np);
+    gsap.fromTo(np,{autoAlpha:0,y:-6},{autoAlpha:1,y:0,duration:.2,ease:'power2.out'});
+    gsap.to(np,{autoAlpha:0,duration:.3,delay:.9,ease:'power2.in'});}
+  function placeIndicator(name,animate){var z=zones.filter(function(b){return b.dataset.screen===name;})[0];
+    var r=z.getBoundingClientRect(),br=zonebar.getBoundingClientRect();var x=r.left-br.left+r.width*0.18,w=r.width*0.64;
+    gsap.to(zind,{backgroundColor:indColorFor(name),duration:.3,ease:'power2.out'});
+    if(animate&&!RMon())gsap.to(zind,{x:x,width:w,duration:.44,ease:'back.out(1.1)'});else gsap.set(zind,{x:x,width:w});}
+  function entFrom(){return {autoAlpha:0,x:fromX,y:fromY,scale:fromS};}
+  function entTo(extra){return Object.assign({autoAlpha:1,x:0,y:0,scale:1,duration:.4,stagger:{each:.04,amount:.34},ease:'expo.out',clearProps:'transform'},extra||{});}
+  function loadStagger(screen){if(RMon()){gsap.set(kids(screen),{clearProps:'opacity,transform'});return;}gsap.fromTo(kids(screen),entFrom(),entTo());}
+
+  // clip-path for the region to SHOW, given progress 0..1.2
+  function clipPathFor(prog,ox,oy,maxR,ph){
+    if(shape==='radial'||shape==='rings'){ return 'circle('+(prog*maxR)+'% at '+ox+'% '+oy+'%)'; }
+    var y=prog*165-42, pts=['0% 0%','100% 0%'];   // start fully above screen so no corner pre-reveals
+    for(var x=100;x>=0;x-=2.5){                    // fine sampling = smooth curves, not faceted/sharp
+      var off=0;
+      if(shape==='angled') off=(x-50)*0.52;
+      else if(shape==='ripple') off=9*Math.sin(x*0.23+ph*1.0);   // large, smooth, rolling waves (~4)
+      pts.push(x+'% '+(y+off)+'%');
+    }
+    return 'polygon('+pts.join(',')+')';
+  }
+
+  function transition(from,to){
+    animating=true;
+    var fromEl=el(from), toEl=el(to); toEl.hidden=false;
+    var p=palFor(to), isGrad=!!p.grad;
+    gsap.set(fromEl,{zIndex:1});
+    var sr=stack.getBoundingClientRect();
+    var o=(shape==='radial'||shape==='rings')?origin(to):{x:50,y:0};
+    var ox=o.x, oy=o.y, maxR=Math.hypot(Math.max(ox,100-ox),Math.max(oy,100-oy))*1.18;
+
+    function cleanup(){fromEl.hidden=true;gsap.set([fromEl,toEl],{clearProps:'all'});gsap.set(kids(toEl),{clearProps:'all'});
+      toEl.style.clipPath='';fromEl.style.clipPath='';gsap.set(disc,{display:'none',clearProps:'all'});disc.style.background='';animating=false;}
+
+    if(RMon()){gsap.set(toEl,{zIndex:5});gsap.timeline({onComplete:cleanup}).set(toEl,{autoAlpha:0})
+      .to(toEl,{autoAlpha:1,duration:.12},0).to(fromEl,{autoAlpha:0,duration:.1},0);return;}
+
+    flashNow();
+    function bgFor(ringOff){
+      if(shape==='rings'){ var a=isGrad?p.grad[0]:p.base, b=isGrad?p.grad[1]:(p.deep||p.base);
+        return 'repeating-radial-gradient(circle at '+ox+'% '+oy+'%,'+b+' '+ringOff+'px '+(ringOff+8)+'px,'+a+' '+(ringOff+8)+'px '+(ringOff+44)+'px)'; }
+      if(isGrad) return 'linear-gradient(145deg,'+p.grad[0]+' 0%,'+p.grad[1]+' 100%)';
+      if(colorKey==='zone') return 'radial-gradient(circle at '+ox+'% '+oy+'%,'+p.deep+' 0 40%,'+p.base+' 100%)';
+      return p.base; // flat solid
+    }
+    gsap.set(disc,{display:'block',autoAlpha:1,zIndex:4});
+    gsap.set(toEl,{zIndex:5});
+
+    var st={L:0,T:0,ph:0};
+    function paint(){
+      disc.style.background=bgFor((st.ph*6)%44);
+      disc.style.clipPath='circle('+(st.L*maxR)+'% at '+ox+'% '+oy+'%)';   // colour floods in fast + plain
+      toEl.style.clipPath=clipPathFor(st.T,ox,oy,maxR,st.ph);              // the SHAPE lives on the trailing reveal edge
+    }
+    paint();
+    // ripple animates its reveal at slow-mo pace (big lazy waves); every other shape stays normal speed
+    var slow = shape==='ripple';
+    var revDur=slow?2.0:0.6, phDur=slow?2.0:0.95, discFade=slow?1.8:0.84;
+    var stagAt=slow?0.55:0.28, stagEach=slow?0.12:0.038, stagAmt=slow?1.15:0.32, stagDur=slow?0.5:0.38;
+    var phEnd = shape==='ripple'?6 : shape==='rings'?9 : 0;
+    var tl=gsap.timeline({onComplete:cleanup});
+    tl.to(st,{L:1.18,duration:.3,ease:'power3.out',onUpdate:paint},0)                           // colour covers (fast flood, normal)
+      .to(st,{T:1.18,duration:revDur,ease:'power2.inOut',onUpdate:paint},0.2)                   // shaped reveal sweeps away
+      .to(st,{ph:phEnd,duration:phDur,ease:'none',onUpdate:paint},0)                            // organic drift
+      .to(disc,{autoAlpha:0,duration:.16,ease:'power1.out'},discFade);
+    if(staggerOn) tl.fromTo(kids(toEl),entFrom(),entTo({duration:stagDur,stagger:{each:stagEach,amount:stagAmt}}),stagAt);
+  }
+
+  function origin(to){var sr=stack.getBoundingClientRect();
+    if(lastTap){return {x:(lastTap.x-sr.left)/sr.width*100,y:Math.max(0,(lastTap.y-sr.top)/sr.height*100)};}
+    var z=zones.filter(function(b){return b.dataset.screen===to;})[0];var r=z.getBoundingClientRect();
+    return {x:(r.left+r.width/2-sr.left)/sr.width*100,y:0};}
+
+  function navigate(to){if(to===current||animating)return;var from=current;
+    zones.forEach(function(b){b.setAttribute('aria-current',b.dataset.screen===to?'true':'false');});
+    placeIndicator(to,true);transition(from,to);current=to;}
+
+  zones.forEach(function(b){b.addEventListener('click',function(e){lastTap={x:e.clientX,y:e.clientY};navigate(b.dataset.screen);});});
+  document.querySelectorAll('.sbtn[data-shape]').forEach(function(b){b.addEventListener('click',function(){
+    shape=b.dataset.shape;document.querySelectorAll('.sbtn[data-shape]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    el('sHint').innerHTML=hints[shape];});});
+  document.querySelectorAll('[data-color]').forEach(function(b){b.addEventListener('click',function(){
+    colorKey=b.dataset.color;document.querySelectorAll('[data-color]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    placeIndicator(current,false);});});
+  var stagBtn=el('stag');stagBtn.addEventListener('click',function(){staggerOn=!staggerOn;stagBtn.setAttribute('aria-pressed',staggerOn?'true':'false');});
+  el('replay').addEventListener('click',function(){loadStagger(el(current));});
+  var forceBtn=el('force'),slowBtn=el('slow'),badge=el('rmBadge');
+  function syncBadge(){badge.hidden=!(rmQuery.matches&&!force);}
+  forceBtn.addEventListener('click',function(){force=!force;forceBtn.setAttribute('aria-pressed',force?'true':'false');syncBadge();});
+  slowBtn.addEventListener('click',function(){var on=slowBtn.getAttribute('aria-pressed')!=='true';slowBtn.setAttribute('aria-pressed',on?'true':'false');gsap.globalTimeline.timeScale(on?0.3:1);});
+  if(rmQuery.addEventListener)rmQuery.addEventListener('change',syncBadge);syncBadge();
+  window.addEventListener('load',function(){placeIndicator('yourday',false);loadStagger(el('yourday'));});
+  placeIndicator('yourday',false);
+})();
+</script>

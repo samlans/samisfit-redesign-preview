@@ -1,0 +1,389 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Active Workout Flow</title>
+<style>
+/* ============================================================
+   SamsisFit - Active Workout, B2 converged + INTERACTIVE.
+   Tap a field to edit (stepper), log the set, flow into the
+   E-style rest timer, skip to the next set. GSAP throughout.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --shadow:0 30px 70px -30px rgba(20,18,12,.6);color-scheme:light;--e-expo:cubic-bezier(.16,1,.3,1);--e-quart:cubic-bezier(.25,1,.5,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 30px 70px -26px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 30px 70px -26px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:40px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,44px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:13px 0 10px;text-wrap:balance}
+.lede{max-width:64ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0 2px}
+.btn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer}
+.note{font-size:12.5px;color:var(--muted)}
+.stage-wrap{display:flex;justify-content:center;margin-top:26px}
+
+.phone{width:100%;max-width:372px;aspect-ratio:9/19.5;border-radius:40px;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08);overflow:hidden;background:#000}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#efece3;color:#1b1a17;border-radius:40px}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:12px 22px 2px;font-size:11.5px;font-weight:700;flex:none}
+.sb .r{font-size:10px;opacity:.85}
+.ses{display:flex;align-items:center;gap:9px;padding:7px 15px 9px;flex:none}
+.ses .pill{font:800 10px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;background:#1a1813;color:#fff;padding:6px 10px;border-radius:999px}
+.ses .el{font:800 15px/1 "Bricolage Grotesque";letter-spacing:-.01em;margin-left:auto}
+.ses .el small{font-size:10px;color:#8a867b;font-weight:700;letter-spacing:.04em}
+.ses .x{width:26px;height:26px;border-radius:50%;background:#e3dfd3;color:#6f6c62;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:9px;padding:9px 13px 12px;overflow:hidden}
+.cex{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:11px 13px;flex:none}
+.cex .dot{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:800 12px/1 "Bricolage Grotesque";flex:none}
+.cex .dot.done{background:#bfe39a;color:#243800}.cex .dot.up{background:#efe7da;color:#9a9488}
+.cex .nm{font:800 14px/1.1 "Hanken Grotesk"}
+.cex .sub{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.cex .cnt{margin-left:auto;font:700 11px/1 "Hanken Grotesk";color:#8a867b}
+.ring{width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;position:relative}
+.ring::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}
+.ring b{position:relative;z-index:1;font:800 10px/1 "Bricolage Grotesque";color:#1a1813}
+.stepwrap{height:0;overflow:hidden}
+.keywrap{height:0;overflow:hidden}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.key{background:rgba(255,255,255,.08);border:0;border-radius:12px;padding:14px 0;color:#fff;font:800 20px/1 "Bricolage Grotesque";cursor:pointer}
+.key:active{transform:scale(.94)}
+.key.back{color:#ff9d6a}
+.key.done{background:#ff6b5e;color:#2a0b07}
+.caret{color:#ff6b5e;font-weight:800;margin-left:1px;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* active card holds the logging face AND the rest face */
+.activewrap{position:relative;flex:none;border-radius:22px;overflow:hidden}
+.ex{background:#1a1813;color:#fff;border-radius:22px;padding:16px;position:relative;overflow:hidden}
+.ex .top{display:flex;justify-content:space-between;align-items:baseline}
+.ex .nm{font:800 22px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.ex .ct{font:800 11px/1 "Hanken Grotesk";letter-spacing:.06em;color:#ff9d6a}
+.ex .tgt{font:600 12px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.66);margin-top:5px}
+.ex .tgt b{color:#fff;font-weight:800}
+.rir{display:inline-block;font:800 9.5px/1 "Hanken Grotesk";letter-spacing:.04em;background:rgba(255,107,94,.22);color:#ff9d6a;padding:4px 7px;border-radius:6px;margin-left:3px}
+
+/* banked sets */
+.banked{margin-top:12px;display:flex;flex-direction:column;gap:0}
+.brow{display:flex;align-items:center;gap:9px;padding:7px 2px;overflow:hidden}
+.brow .sn{font:800 9.5px/1 "Hanken Grotesk";color:rgba(255,255,255,.4);width:40px;letter-spacing:.04em}
+.brow .sv{font:800 14px/1 "Bricolage Grotesque";color:#fff}
+.brow .sv small{font-size:9.5px;color:rgba(255,255,255,.5);font-weight:700}
+.brow .ck{margin-left:auto;width:19px;height:19px;border-radius:50%;background:#bfe39a;color:#243800;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+
+/* fields - all editable; focused one gets the coral ring */
+.fieldlab{font:800 9px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.66);margin:13px 0 7px}
+.fields{display:flex;gap:7px}
+.fld{flex:1;background:#fff;border:2px solid #fff;border-radius:13px;padding:9px 6px;text-align:center;cursor:pointer}
+.fld .fl{font:800 8.5px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:#9a9488}
+.fld .fv{font:800 25px/1 "Bricolage Grotesque";letter-spacing:-.02em;margin-top:5px;color:#1a1813;overflow:hidden}
+.fld.focus{border-color:#ff6b5e;box-shadow:0 0 0 4px rgba(255,107,94,.25)}
+
+/* stepper for the focused field */
+.stepper{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.07);border-radius:13px;padding:7px 9px}
+.stepper .sx{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.12);color:#fff;border:0;font:800 22px/1 "Bricolage Grotesque";cursor:pointer;flex:none}
+.stepper .sx:active{transform:scale(.92)}
+.stepper .mid{flex:1;text-align:center}
+.stepper .mid .ml{font:800 8.5px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.stepper .mid .mv{font:800 20px/1 "Bricolage Grotesque";color:#fff;margin-top:4px}
+
+.dots{display:flex;gap:5px;margin-top:12px}
+.dots i{flex:1;height:5px;border-radius:999px;background:rgba(255,255,255,.14)}
+.dots i.done{background:#bfe39a}.dots i.now{background:#ff6b5e}
+.log{margin-top:12px;width:100%;background:#ff6b5e;color:#2a0b07;border:0;border-radius:14px;padding:14px;font:800 15px/1 "Hanken Grotesk";cursor:pointer}
+.log:active{transform:scale(.98)}
+
+/* rest face (E split+rest) overlays the card */
+.rest{position:absolute;inset:0;background:#1a1813;color:#fff;border-radius:22px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:translateY(101%);visibility:hidden}
+.rest .rk{font:800 9.5px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:#ff9d6a}
+.rest .rt{font:800 58px/1 "Bricolage Grotesque";letter-spacing:-.03em;margin:10px 0 5px;font-variant-numeric:tabular-nums}
+.rest .rn{font:600 12.5px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.62)}
+.rest .rn b{color:#fff;font-weight:800}
+.rest .rbar{width:100%;height:6px;border-radius:999px;background:rgba(255,255,255,.12);margin:16px 0 14px;overflow:hidden}
+.rest .rbar i{display:block;height:100%;width:100%;background:#ff6b5e;border-radius:999px;transform-origin:left}
+.rest .rb{display:flex;gap:8px;width:100%}
+.rest .rb button{flex:1;border:0;border-radius:12px;padding:12px;font:800 13px/1 "Hanken Grotesk";cursor:pointer}
+.rest .rb .skip{background:#ff6b5e;color:#2a0b07}
+.rest .rb .add{background:rgba(255,255,255,.1);color:#fff}
+.rest .rb button:active{transform:scale(.96)}
+
+.toast{position:absolute;left:50%;top:64px;transform:translateX(-50%) translateY(-6px);z-index:9;opacity:0;
+  font:800 10px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase;color:#243800;background:#bfe39a;padding:8px 13px;border-radius:999px;pointer-events:none;white-space:nowrap}
+
+.foot{max-width:64ch;margin:28px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}
+.foot b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Active Workout &middot; interactive flow</span>
+  <h1>Tap it: edit, log, rest, repeat</h1>
+  <p class="lede">The converged <b>B2</b>, made real. <b>Tap any field</b> (Weight / Reps / RIR) to edit it with the stepper. <b>Log the set</b> and watch it bank, the dot fill, and the <b>rest timer</b> (your E split+rest pick) take over. <b>Skip rest</b> to load the next set. Motion flows between every state; nothing just pops.</p>
+  <div class="bar"><button class="btn" id="reset">&#8635; Reset demo</button><span class="note">Everything here is tappable &middot; weight steps 5 lb &middot; reduced-motion safe</span></div>
+
+  <div class="stage-wrap">
+    <div class="phone"><div class="scr">
+      <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+      <div class="ses"><span class="pill">Legs A</span><span class="el" id="elapsed">42:15<small> elapsed</small></span><span class="x">&times;</span></div>
+      <span class="toast" id="toast">Set banked</span>
+      <div class="body">
+        <div class="cex"><div class="ring" style="background:conic-gradient(#8bc34a 0 100%,#efe7da 0)"><b>&check;</b></div><div><div class="nm">Back Squat</div><div class="sub">Quads &middot; +10 lb vol</div></div><div class="cnt">4/4</div></div>
+
+        <div class="activewrap" id="activewrap">
+          <div class="ex" id="exface">
+            <div class="top"><span class="nm">Leg Press</span><span class="ct" id="setct">SET 2 / 4</span></div>
+            <div class="tgt">Target <b id="tgt">245 &times; 10</b><span class="rir">@ 2 RIR</span></div>
+            <div class="banked" id="banked">
+              <div class="brow"><span class="sn">SET 1</span><span class="sv">245<small> lb</small> &times; 11</span><span class="ck">&check;</span></div>
+            </div>
+            <div class="fieldlab">Logging set <span id="logsetn">2</span></div>
+            <div class="fields" id="fields">
+              <div class="fld focus" data-field="weight"><div class="fl">Weight</div><div class="fv" id="f-weight">245</div></div>
+              <div class="fld" data-field="reps"><div class="fl">Reps</div><div class="fv" id="f-reps">10</div></div>
+              <div class="fld" data-field="rir"><div class="fl">RIR</div><div class="fv" id="f-rir">2</div></div>
+            </div>
+            <div class="stepper"><button class="sx" id="minus">&minus;</button><div class="mid"><div class="ml" id="step-l">Weight &middot; lb</div><div class="mv" id="step-v">245</div></div><button class="sx" id="plus">+</button></div>
+            <div class="dots" id="dots"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+            <button class="log" id="log">Log set 2 &rarr;</button>
+          </div>
+
+          <div class="rest" id="rest">
+            <div class="rk">Rest &middot; Leg Press</div>
+            <div class="rt" id="rt">1:30</div>
+            <div class="rn">Next: <b id="restnext">Set 3 &middot; 245 &times; 10 @ 2</b></div>
+            <div class="rbar"><i id="rbar"></i></div>
+            <div class="rb"><button class="skip" id="skip">Skip rest</button><button class="add" id="add30">+30s</button></div>
+          </div>
+        </div>
+
+        <div class="cex"><div class="ring" style="background:conic-gradient(#ff6b5e 0 0%,#efe7da 0)"><b>0/3</b></div><div><div class="nm">Hack Squat</div><div class="sub">Quads &middot; target 180 &times; 10</div></div><div class="cnt">next</div></div>
+        <div class="cex"><div class="ring" style="background:conic-gradient(#ff6b5e 0 0%,#efe7da 0)"><b>0/3</b></div><div><div class="nm">Seated Leg Curl</div><div class="sub">Hamstrings &middot; target 90 &times; 12</div></div><div class="cnt"></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="foot">Fixes from the tool pass are in: RIR is an active field (not greyed), fields/stepper clear the 48dp target floor, motion fires on state change not idle. Tell me what to tune, the stepper feel, the rest length, the bank animation, and I'll refine, then wire the radial-sunset flash for moving between exercises.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var TARGET={weight:245,reps:10,rir:2}, TOTAL=4, REST=90;
+  var state;
+  function fresh(){ return {setIdx:2, banked:[{w:245,r:11,rir:3}], weight:245,reps:10,rir:2, focus:null, mode:'stepper', typing:'', resting:false, left:REST}; }
+  var $=function(id){return document.getElementById(id);};
+  var restTimer=null;
+
+  function stepFor(f){ return f==='weight'?5:1; }
+  function labelFor(f){ return f==='weight'?'Weight · lb':(f==='reps'?'Reps':'RIR'); }
+
+  function renderStatic(){
+    $('setct').textContent='SET '+state.setIdx+' / '+TOTAL;
+    $('logsetn').textContent=state.setIdx;
+    $('log').innerHTML='Log set '+state.setIdx+' &rarr;';
+    $('f-weight').textContent=state.weight; $('f-reps').textContent=state.reps; $('f-rir').textContent=state.rir;
+    clearFocus(true);
+  }
+  function renderBanked(animateLast){
+    var box=$('banked'); box.innerHTML='';
+    state.banked.forEach(function(b,idx){
+      var row=document.createElement('div'); row.className='brow';
+      row.innerHTML='<span class="sn">SET '+(idx+1)+'</span><span class="sv">'+b.w+'<small> lb</small> &times; '+b.r+' <small>@'+b.rir+'</small></span><span class="ck">&#10003;</span>';
+      box.appendChild(row);
+      if(animateLast && idx===state.banked.length-1 && !RM){
+        gsap.fromTo(row,{height:0,opacity:0,y:-6},{height:row.scrollHeight,opacity:1,y:0,duration:.4,ease:'expo.out',clearProps:'height',onComplete:function(){
+          var ck=row.querySelector('.ck'); gsap.fromTo(ck,{scale:0},{scale:1,duration:.3,ease:'back.out(2)'});
+        }});
+      }
+    });
+  }
+  function clearFocus(instant){
+    if(state.focus){ $('f-'+state.focus).textContent=state[state.focus]; }   // strip any caret
+    state.focus=null; state.mode='stepper'; state.typing='';
+    [].forEach.call($('fields').children,function(el){ el.classList.remove('focus'); });
+    hideStep(instant); hideKey(instant);
+  }
+  function focusField(f){
+    if(state.focus===f){                 // cycle: nudge stepper -> type keypad -> closed
+      if(state.mode==='stepper'){ enterKeypad(f); } else { clearFocus(); }
+      return;
+    }
+    state.focus=f; state.mode='stepper';
+    [].forEach.call($('fields').children,function(el){ el.classList.toggle('focus', el.dataset.field===f); });
+    $('step-l').textContent=labelFor(f); $('step-v').textContent=state[f];
+    hideKey(true); showStep();
+  }
+  function enterStepper(f){
+    state.mode='stepper'; $('f-'+f).textContent=state[f];
+    $('step-l').textContent=labelFor(f); $('step-v').textContent=state[f];
+    hideKey(true); showStep();
+  }
+  function enterKeypad(f){ state.mode='keypad'; state.typing=''; hideStep(true); showKey(); renderTyping(); }
+  function renderTyping(){
+    var f=state.focus; if(!f) return;
+    var shown = state.typing!=='' ? state.typing : '<span style="opacity:.3">'+state[f]+'</span>';
+    $('f-'+f).innerHTML = shown + '<span class="caret">|</span>';
+  }
+  function keyDigit(d){
+    var f=state.focus; if(!f) return;
+    var max = f==='weight'?4 : (f==='reps'?3 : 1);
+    if(state.typing.length<max) state.typing+=d;
+    renderTyping();
+  }
+  function keyBack(){ state.typing=state.typing.slice(0,-1); renderTyping(); }
+  function keyDone(){
+    var f=state.focus; if(!f) return;
+    var v=parseInt(state.typing,10);
+    if(!isNaN(v)){ if(f==='rir') v=Math.max(0,Math.min(5,v)); state[f]=v; }
+    $('f-'+f).textContent=state[f];
+    clearFocus();   // check commits and closes the whole panel (keypad + stepper)
+  }
+  function showStep(){
+    var w=$('stepwrap'); if(!w) return; var inner=w.firstElementChild;
+    if(RM){ w.style.height='auto'; return; }
+    gsap.killTweensOf([w,inner]);
+    gsap.to(w,{height:inner.offsetHeight,duration:.28,ease:'expo.out'});
+    gsap.fromTo(inner,{opacity:0,y:-6},{opacity:1,y:0,duration:.28,ease:'expo.out'});
+  }
+  function hideStep(instant){
+    var w=$('stepwrap'); if(!w) return;
+    gsap.killTweensOf(w);
+    if(RM||instant){ gsap.set(w,{height:0}); return; }
+    gsap.to(w,{height:0,duration:.22,ease:'power2.in'});
+  }
+  function showKey(){
+    var w=$('keywrap'); if(!w) return; var inner=w.firstElementChild;
+    if(RM){ w.style.height='auto'; return; }
+    gsap.killTweensOf([w,inner]);
+    gsap.to(w,{height:inner.offsetHeight,duration:.3,ease:'expo.out'});
+    gsap.fromTo(inner,{opacity:0,y:-6},{opacity:1,y:0,duration:.3,ease:'expo.out'});
+  }
+  function hideKey(instant){
+    var w=$('keywrap'); if(!w) return;
+    gsap.killTweensOf(w);
+    if(RM||instant){ gsap.set(w,{height:0}); return; }
+    gsap.to(w,{height:0,duration:.22,ease:'power2.in'});
+  }
+  function bump(f,dir){
+    var step=stepFor(f);
+    var nv=state[f]+dir*step;
+    if(f==='rir') nv=Math.max(0,Math.min(5,nv));
+    if(f==='reps') nv=Math.max(0,nv);
+    if(f==='weight') nv=Math.max(0,nv);
+    state[f]=nv;
+    var fv=$('f-'+f), mv=$('step-v');
+    if(RM){ fv.textContent=nv; mv.textContent=nv; return; }
+    gsap.fromTo(fv,{y:dir*10,opacity:0},{y:0,opacity:1,duration:.2,ease:'power3.out'}); fv.textContent=nv;
+    gsap.fromTo(mv,{y:dir*8,opacity:0},{y:0,opacity:1,duration:.2,ease:'power3.out'}); mv.textContent=nv;
+  }
+
+  function fmt(s){ var m=Math.floor(s/60), ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
+  function startRest(){
+    state.resting=true; state.left=REST;
+    var next = state.setIdx>TOTAL ? 'Hack Squat &middot; 180 &times; 10' : ('Set '+state.setIdx+' &middot; '+TARGET.weight+' &times; '+TARGET.reps+' @ '+TARGET.rir);
+    $('restnext').innerHTML=next;
+    $('rt').textContent=fmt(state.left);
+    var rest=$('rest');
+    rest.style.visibility='visible';
+    gsap.killTweensOf('#rbar');
+    gsap.set('#rbar',{scaleX:1});
+    if(RM){ gsap.set(rest,{y:'0%'}); }
+    else { gsap.fromTo(rest,{y:'101%'},{y:'0%',duration:.5,ease:'expo.out'}); }
+    gsap.to('#rbar',{scaleX:0,duration:state.left,ease:'none'});
+    clearInterval(restTimer);
+    restTimer=setInterval(function(){
+      state.left--; $('rt').textContent=fmt(Math.max(0,state.left));
+      if(state.left<=0){ endRest(); }
+    },1000);
+  }
+  function endRest(){
+    clearInterval(restTimer); state.resting=false;
+    var rest=$('rest');
+    gsap.killTweensOf('#rbar');
+    function hide(){ rest.style.visibility='hidden'; loadNextSet(); }
+    if(RM){ gsap.set(rest,{y:'101%'}); hide(); }
+    else { gsap.to(rest,{y:'101%',duration:.42,ease:'power3.in',onComplete:hide}); }
+  }
+  function loadNextSet(){
+    if(state.setIdx>TOTAL){ exerciseComplete(); return; }
+    // reset working values to target, re-render, animate fields in
+    state.weight=TARGET.weight; state.reps=TARGET.reps; state.rir=TARGET.rir; state.focus=null;
+    renderStatic();
+    if(!RM){ gsap.fromTo($('fields').children,{y:14,opacity:0},{y:0,opacity:1,duration:.4,stagger:.05,ease:'expo.out',clearProps:'transform'}); }
+  }
+  function exerciseComplete(){
+    toast('Leg Press complete',true);
+    $('exface').innerHTML='<div class="top"><span class="nm">Leg Press</span><span class="ct">DONE</span></div>'+
+      '<div class="tgt" style="margin-top:8px">4 of 4 sets banked &middot; <b>+5 lb vs last block</b></div>'+
+      '<button class="log" id="next" style="margin-top:16px">Next: Hack Squat &rarr;</button>';
+    $('next').addEventListener('click',function(){ fullReset(); });
+  }
+
+  function toast(msg,hold){
+    var t=$('toast'); t.textContent=msg;
+    if(RM){ return; }
+    gsap.killTweensOf(t);
+    gsap.fromTo(t,{autoAlpha:0,y:-6},{autoAlpha:1,y:0,duration:.24,ease:'power2.out'});
+    gsap.to(t,{autoAlpha:0,duration:.3,delay:hold?1.3:.8,ease:'power2.in'});
+  }
+
+  function logSet(){
+    if(state.resting) return;
+    clearFocus();
+    state.banked.push({w:state.weight,r:state.reps,rir:state.rir});
+    renderBanked(true);
+    toast('Set '+state.setIdx+' banked');
+    state.setIdx++;
+    gsap.delayedCall(RM?0:.35, startRest);   // brief beat, then rest takes over
+  }
+
+  function fullReset(){
+    clearInterval(restTimer);
+    state=fresh();
+    // rebuild the ex face (in case it was replaced by complete state)
+    $('exface').innerHTML=''
+      +'<div class="top"><span class="nm">Leg Press</span><span class="ct" id="setct">SET 2 / 4</span></div>'
+      +'<div class="tgt">Target <b id="tgt">245 &times; 10</b><span class="rir">@ 2 RIR</span></div>'
+      +'<div class="banked" id="banked"></div>'
+      +'<div class="fieldlab">Logging set <span id="logsetn">2</span> &middot; <span style="opacity:.55;text-transform:none;letter-spacing:0">tap to nudge &middot; tap again to type</span></div>'
+      +'<div class="fields" id="fields">'
+      +'<div class="fld" data-field="weight"><div class="fl">Weight</div><div class="fv" id="f-weight">245</div></div>'
+      +'<div class="fld" data-field="reps"><div class="fl">Reps</div><div class="fv" id="f-reps">10</div></div>'
+      +'<div class="fld" data-field="rir"><div class="fl">RIR</div><div class="fv" id="f-rir">2</div></div></div>'
+      +'<div class="stepwrap" id="stepwrap"><div class="stepper"><button class="sx" id="minus">&minus;</button><div class="mid"><div class="ml" id="step-l">Weight &middot; lb</div><div class="mv" id="step-v">245</div></div><button class="sx" id="plus">+</button></div></div>'
+      +'<div class="keywrap" id="keywrap"><div class="keypad">'
+      +'<button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>'
+      +'<button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>'
+      +'<button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>'
+      +'<button class="key back" data-k="back">&#9003;</button><button class="key" data-k="0">0</button><button class="key done" data-k="done">&#10003;</button>'
+      +'</div></div>'
+      +'<button class="log" id="log">Log set 2 &rarr;</button>';
+    wire();
+    renderBanked(false); renderStatic();
+    $('rest').style.visibility='hidden'; gsap.set('#rest',{y:'101%'});
+  }
+
+  function wire(){
+    [].forEach.call($('fields').children,function(el){
+      el.addEventListener('click',function(){ focusField(el.dataset.field); if(!RM) gsap.fromTo(el,{scale:.96},{scale:1,duration:.22,ease:'power3.out'}); });
+    });
+    $('minus').addEventListener('click',function(){ if(state.focus) bump(state.focus,-1); });
+    $('plus').addEventListener('click',function(){ if(state.focus) bump(state.focus,1); });
+    var kw=$('keywrap');
+    if(kw){ [].forEach.call(kw.querySelectorAll('.key'),function(b){ b.addEventListener('click',function(){
+      var k=b.dataset.k; if(k==='back') keyBack(); else if(k==='done') keyDone(); else keyDigit(k);
+      if(!RM) gsap.fromTo(b,{scale:.9},{scale:1,duration:.18,ease:'power3.out'});
+    }); }); }
+    $('log').addEventListener('click',logSet);
+  }
+  $('skip').addEventListener('click',endRest);
+  $('add30').addEventListener('click',function(){ state.left+=30; $('rt').textContent=fmt(state.left);
+    gsap.killTweensOf('#rbar'); var frac=Math.min(1,state.left/REST); gsap.set('#rbar',{scaleX:frac}); gsap.to('#rbar',{scaleX:0,duration:state.left,ease:'none'}); });
+  $('reset').addEventListener('click',fullReset);
+
+  fullReset();
+})();
+</script>

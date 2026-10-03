@@ -1,0 +1,124 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SamsisFit Redesign Index</title>
+<style>
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --under:#dc3b2e;--mid:#e8a21a;--good:#3fa65a;
+  --shadow:0 20px 50px -28px rgba(20,18,12,.55);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 20px 50px -24px rgba(0,0,0,.7)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 20px 50px -24px rgba(0,0,0,.7)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:44px 80px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(32px,6vw,56px)/1 "Bricolage Grotesque";letter-spacing:-.03em;margin:14px 0 12px;text-wrap:balance}
+.lede{max-width:66ch;color:var(--muted);font-size:16px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:48px 0 16px}
+
+/* screen cards */
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--chip);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);text-decoration:none;color:inherit;transition:transform .18s cubic-bezier(.16,1,.3,1)}
+.card:hover{transform:translateY(-3px)}
+.card .swatch{height:78px;display:flex;align-items:flex-end;padding:12px 14px;position:relative}
+.card .swatch .n{font:800 11px/1 "Hanken Grotesk";letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.9)}
+.card .b{padding:14px 15px 16px;display:flex;flex-direction:column;gap:7px;flex:1}
+.card .t{font:800 19px/1.05 "Bricolage Grotesque";letter-spacing:-.01em}
+.card .d{font:600 12.5px/1.45 "Hanken Grotesk";color:var(--muted)}
+.card .st{margin-top:auto;display:inline-flex;align-items:center;gap:6px;font:800 10px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase}
+.st.done{color:var(--good)}.st.round{color:var(--mid)}.st.lab{color:var(--muted)}
+.st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.go{margin-top:9px;font:800 12px/1 "Hanken Grotesk";color:var(--accent)}
+
+/* mini phone preview swatch backgrounds */
+.sw-day{background:linear-gradient(135deg,#1a1813 0 42%,#ff6b5e 42%)}
+.sw-start{background:linear-gradient(135deg,#1a1813 0 55%,#8fd3e8 55%)}
+.sw-aw{background:linear-gradient(135deg,#1a1813 0 60%,#ffc247 60%)}
+.sw-meso{background:linear-gradient(135deg,#1a1813 0 48%,#bfe39a 48%)}
+.sw-prof{background:linear-gradient(135deg,#1a1813 0 50%,#c9b8f0 50%)}
+.sw-flash{background:linear-gradient(135deg,#ff8a4c,#e23a6d)}
+
+/* system panel */
+.sys{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.panel{background:var(--chip);border:1px solid var(--line);border-radius:18px;padding:17px}
+.panel .pk{font:800 10px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.dot{width:22px;height:22px;border-radius:7px;flex:none;border:1px solid rgba(0,0,0,.08)}
+.row .l{font:700 12.5px/1.2 "Hanken Grotesk"}
+.row .l small{display:block;color:var(--muted);font-weight:600;font-size:11px;margin-top:2px}
+.typ .big{font:800 30px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.typ .lbl{font:700 15px/1.2 "Hanken Grotesk";margin-top:6px}
+.typ .q{font:500 italic 16px/1.4 "Newsreader",Georgia,serif;color:var(--muted);margin-top:8px}
+.foot{margin-top:40px;color:var(--muted);font-size:13.5px;line-height:1.65}
+.foot b{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Redesign &middot; everything so far</span>
+  <h1>Every screen we reworked</h1>
+  <p class="lede">The full set from this session, all in the one new language. Tap a card to open that screen's artifact in a new tab. Converged = a single resolved screen; round one = directions still to pick from.</p>
+
+  <h2>Screens</h2>
+  <div class="screens">
+    <a class="card" href="yourday.html" >
+      <div class="swatch sw-day"><span class="n">Home hub</span></div>
+      <div class="b"><div class="t">Your Day</div><div class="d">Up-next workout hero with the mesocycle week tracker, fuel, weigh-in, meals, steps, and a quote of the day.</div><span class="st done">Converged</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="lift.html" >
+      <div class="swatch sw-start"><span class="n">Main page</span></div>
+      <div class="b"><div class="t">Lift</div><div class="d">Today's session, your routines, Build / Empty / Templates. Tap a routine for Start or Edit, tap Build for Routine or Mesocycle. Interactive pop-up + parallax system.</div><span class="st done">Converged &middot; interactive</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="active-workout.html" >
+      <div class="swatch sw-aw"><span class="n">Live session</span></div>
+      <div class="b"><div class="t">Active Workout</div><div class="d">Interactive: tap a field to nudge or type, log the set, the rest timer takes over, next set loads. Fully tappable.</div><span class="st done">Converged &middot; interactive</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="mesocycle.html" >
+      <div class="swatch sw-meso"><span class="n">Planning</span></div>
+      <div class="b"><div class="t">Mesocycle builder</div><div class="d">Name, weeks + deload, days + assign routines, review. Plus the shared day/exercise builder. Four directions.</div><span class="st round">Round one &middot; 4 options</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="profile.html" >
+      <div class="swatch sw-prof"><span class="n">Analytics</span></div>
+      <div class="b"><div class="t">Profile / Progress</div><div class="d">Strength gains by est. 1RM, volume vs MEV/MAV/MRV landmarks (new status colours), consistency, body weight. Three directions.</div><span class="st round">Round one &middot; 3 options</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="settings.html" >
+      <div class="swatch" style="background:linear-gradient(135deg,#1a1813 0 52%,#8fd3e8 52%)"><span class="n">Account</span></div>
+      <div class="b"><div class="t">Settings</div><div class="d">Link watch &amp; health services, units, accent, theme, notifications, account. Reached from the avatar menu.</div><span class="st round">Round one &middot; 2 options</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="flash.html" >
+      <div class="swatch sw-flash"><span class="n">Motion</span></div>
+      <div class="b"><div class="t">Flash transition lab</div><div class="d">The radial + Sunset screen transition we locked, with the other shapes and colours banked for later.</div><span class="st lab">Lab &middot; radial + Sunset locked</span><span class="go">Open &rarr;</span></div>
+    </a>
+  </div>
+
+  <h2>Shared language</h2>
+  <div class="sys">
+    <div class="panel">
+      <div class="pk">Status colours &middot; app-wide</div>
+      <div class="row"><span class="dot" style="background:var(--under)"></span><span class="l">Under<small>below what you want &middot; low volume, missed target</small></span></div>
+      <div class="row"><span class="dot" style="background:var(--mid)"></span><span class="l">Mid<small>in range &middot; acceptable</small></span></div>
+      <div class="row"><span class="dot" style="background:var(--good)"></span><span class="l">On target<small>upper / good &middot; hit or beat target</small></span></div>
+      <div class="row" style="margin-top:12px;color:var(--muted);font:600 11.5px/1.4 'Hanken Grotesk'">Used the same way everywhere: volume vs landmarks, logged weight vs target, progression arrows, readiness.</div>
+    </div>
+    <div class="panel">
+      <div class="pk">Palette</div>
+      <div class="row"><span class="dot" style="background:#efece3"></span><span class="l">Ground<small>warm cream</small></span></div>
+      <div class="row"><span class="dot" style="background:#1a1813"></span><span class="l">Hero / ink<small>warm near-black</small></span></div>
+      <div class="row"><span class="dot" style="background:#ff6b5e"></span><span class="l">Accent<small>coral &middot; primary action</small></span></div>
+      <div class="row"><span class="dot" style="background:#ffc247"></span><span class="dot" style="background:#8fd3e8"></span><span class="dot" style="background:#bfe39a"></span><span class="dot" style="background:#c9b8f0"></span><span class="l">Tile set<small>amber / sky / lime / violet</small></span></div>
+    </div>
+    <div class="panel typ">
+      <div class="pk">Type &amp; motion</div>
+      <div class="big">245 &times; 10</div>
+      <div class="lbl">Bricolage Grotesque numbers</div>
+      <div class="lbl" style="font-weight:600;color:var(--muted)">Hanken Grotesk labels &amp; body</div>
+      <div class="q">"Newsreader italic for quotes."</div>
+      <div class="row" style="margin-top:12px;color:var(--muted);font:600 11.5px/1.4 'Hanken Grotesk'">Motion: GSAP ease-out, radial-Sunset flash between zones, state-change only (no idle).</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Where things stand:</b> Your Day, Active Workout and the Lift main page are converged (Lift carries the shared pop-up + parallax system); Mesocycle builder, Profile and Settings are round-one direction sets awaiting your pick. The <b>status colours</b> (under / mid / on-target) are now a shared token set, so logged weights, progression and volume all speak the same language. Tell me which directions to converge and I'll finish them and wire the real destinations.
+  </div>
+</div>

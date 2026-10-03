@@ -1,0 +1,207 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profile Directions</title>
+<style>
+/* ============================================================
+   SamsisFit - Profile / Progress, directions in the new
+   language. Post-session analytics: strength gains (est 1RM),
+   volume vs landmarks, consistency, body weight, milestones.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --under:#dc3b2e;--mid:#e8a21a;--good:#3fa65a;   /* shared status scale: under / mid / on-target */
+  --shadow:0 26px 60px -30px rgba(20,18,12,.6);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:40px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,46px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:13px 0 10px;text-wrap:balance}
+.lede{max-width:74ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 2px}
+.btn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:flex;flex-wrap:wrap;gap:30px;justify-content:center;margin-top:28px}
+.col{width:320px;max-width:100%;display:flex;flex-direction:column;gap:12px}
+.tag{font:800 14px/1.3 "Bricolage Grotesque";letter-spacing:-.01em}
+.tag span{display:block;font:600 12px/1.45 "Hanken Grotesk";color:var(--muted);margin-top:4px}
+.tag em{font-style:normal;color:var(--accent)}
+
+.phone{width:100%;aspect-ratio:9/19.5;border-radius:38px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08)}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#efece3;color:#1b1a17}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:11px 20px 2px;font-size:11.5px;font-weight:700;flex:none}
+.sb .r{font-size:10px;opacity:.85}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;padding:8px 13px 12px;overflow:hidden}
+.sech{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;color:#9a9488;padding:5px 2px 0;display:flex;justify-content:space-between}
+.sech .tr{color:#b9b3a4;font-weight:700;letter-spacing:.02em;text-transform:none}
+
+/* profile header */
+.phead{display:flex;align-items:center;gap:12px;padding:4px 2px}
+.phead .av{width:48px;height:48px;border-radius:50%;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 19px/1 "Bricolage Grotesque"}
+.phead .nm{font:800 20px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.phead .sub{font:600 11.5px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+.phead .rng{margin-left:auto;font:800 10px/1 "Hanken Grotesk";letter-spacing:.04em;background:#fff;border:1px solid #e6e3d9;border-radius:999px;padding:8px 11px;color:#6f6c62}
+
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.t{border-radius:20px;padding:15px;display:flex;flex-direction:column;gap:3px;min-height:96px;position:relative;overflow:hidden}
+.wide{grid-column:1/3}
+.tk{font:800 9.5px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;opacity:.6}
+.val{font:800 27px/1 "Bricolage Grotesque";letter-spacing:-.02em;margin-top:4px}
+.val small{font-size:12px;opacity:.55;font-weight:700}
+.sub2{font:600 11px/1.3 "Hanken Grotesk";opacity:.62;margin-top:3px}
+.coral{background:#ff6b5e;color:#2a0b07}.sky{background:#8fd3e8;color:#06252f}
+.amber{background:#ffc247;color:#2a1c00}.card{background:#fff;border:1px solid #e6e3d9}
+.dark{background:#1a1813;color:#fff}
+
+.spark{display:flex;align-items:flex-end;gap:3px;height:34px;margin-top:8px}
+.spark i{flex:1;background:currentColor;opacity:.3;border-radius:3px 3px 0 0}
+.spark i.hi{opacity:1}
+.weekdots{display:flex;gap:4px;margin-top:9px}
+.weekdots i{width:12px;height:12px;border-radius:4px;background:rgba(0,0,0,.14)}
+.weekdots i.on{background:#2a0b07}
+
+/* landmark bars */
+.lmrow{margin-top:11px}
+.lmrow:first-of-type{margin-top:8px}
+.lmhead{display:flex;justify-content:space-between;font:700 11px/1 "Hanken Grotesk"}
+.lmhead .mg{color:#fff}.lmhead .ct{color:rgba(255,255,255,.6)}
+.lmtrack{position:relative;height:8px;border-radius:999px;background:rgba(255,255,255,.12);margin-top:6px}
+.lmtrack .fill{height:100%;border-radius:999px}
+.lmtrack .tick{position:absolute;top:-3px;width:2px;height:14px;background:rgba(255,255,255,.4);border-radius:2px}
+.lmleg{display:flex;gap:12px;margin-top:11px}
+.lmleg i{display:inline-flex;align-items:center;gap:5px;font:700 9px/1 "Hanken Grotesk";letter-spacing:.04em;text-transform:uppercase}
+.lmleg i::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+
+/* strength gains list */
+.gain{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e6e3d9;border-radius:14px;padding:11px 13px}
+.gain .nm{font:800 13.5px/1.1 "Hanken Grotesk"}
+.gain .e{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.gain .d{margin-left:auto;font:800 14px/1 "Bricolage Grotesque";color:#1a7a3a}
+.gain .d small{font-size:9px;font-weight:700}
+.minibar{width:54px;height:6px;border-radius:999px;background:#eee7d7;overflow:hidden;margin-left:6px;flex:none}
+.minibar i{display:block;height:100%;background:#8bc34a;border-radius:999px}
+
+.cex{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e6e3d9;border-radius:14px;padding:11px 13px}
+.cex .dot{width:30px;height:30px;border-radius:9px;background:#efe7da;color:#6f6c62;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";flex:none}
+.cex .nm{font:800 13.5px/1.1 "Hanken Grotesk"}
+.cex .sub{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.cex .cnt{margin-left:auto;font:700 11px/1 "Hanken Grotesk";color:#8a867b}
+
+.herostat{background:#1a1813;color:#fff;border-radius:22px;padding:20px 17px}
+.herostat .hk{font:800 10px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:#ff9d6a}
+.herostat .hv{font:800 72px/1 "Bricolage Grotesque";letter-spacing:-.04em;margin:8px 0 2px}
+.herostat .hs{font:600 12.5px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.66)}
+
+.handle{flex:none;display:flex;justify-content:center;padding:4px 0 9px}
+.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+.foot{max-width:76ch;margin:30px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}
+.foot b{color:var(--ink)}
+.anim{opacity:0}
+@media (prefers-reduced-motion:reduce){.anim{opacity:1!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Profile / Progress &middot; round one</span>
+  <h1>Your progress, three reads</h1>
+  <p class="lede">Profile is the <b>analytics home</b>: strength gains by estimated 1RM, training volume against the MEV / MAV / MRV landmarks, consistency, body weight, and milestones, over a chosen time range. Three ways to compose that, same language as the rest of the app.</p>
+  <div class="bar"><button class="btn" id="replay">&#8635; Replay motion</button><span class="note">All figures come from the engines &middot; reduced-motion safe</span></div>
+
+  <div class="grid">
+
+    <!-- Pr1 bento dashboard -->
+    <div class="col">
+      <div class="tag">Pr1 &middot; Bento dashboard<span>Stat tiles at a glance, colour-coded like Your Day. Volume vs landmarks gets the wide tile. Densest.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="body">
+          <div class="phead anim"><span class="av">S</span><div><div class="nm">Sam Lans</div><div class="sub">Intermediate &middot; 2 yr training</div></div><span class="rng">8 weeks &rsaquo;</span></div>
+          <div class="bento">
+            <div class="t coral anim"><div class="tk">Streak</div><div class="val">6<small> wk</small></div><div class="sub2">4.2 sessions / wk</div><div class="weekdots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+            <div class="t card anim"><div class="tk">Body weight</div><div class="val">148.0<small> lb</small></div><div class="sub2" style="color:#1a7a3a">&#9660; 1.2 lb / mo</div><div class="spark" style="color:#8fd3e8"><i style="height:50%"></i><i style="height:62%"></i><i style="height:48%"></i><i style="height:44%"></i><i style="height:40%"></i><i class="hi" style="height:36%"></i></div></div>
+            <div class="t dark wide anim"><div class="tk" style="opacity:.6">Volume vs landmarks &middot; sets / wk</div>
+              <div class="lmrow"><div class="lmhead"><span class="mg">Quads</span><span class="ct">18 / MAV 22</span></div><div class="lmtrack"><div class="fill" style="width:75%;background:var(--good)"></div><div class="tick" style="left:45%"></div><div class="tick" style="left:78%"></div></div></div>
+              <div class="lmrow"><div class="lmhead"><span class="mg">Chest</span><span class="ct">13 / MAV 18</span></div><div class="lmtrack"><div class="fill" style="width:54%;background:var(--mid)"></div><div class="tick" style="left:40%"></div><div class="tick" style="left:72%"></div></div></div>
+              <div class="lmrow"><div class="lmhead"><span class="mg">Rear delts</span><span class="ct">7 / MEV 14</span></div><div class="lmtrack"><div class="fill" style="width:30%;background:var(--under)"></div><div class="tick" style="left:50%"></div><div class="tick" style="left:80%"></div></div></div>
+              <div class="lmleg"><i style="color:var(--under)">under</i><i style="color:var(--mid)">mid</i><i style="color:var(--good)">on target</i></div>
+            </div>
+            <div class="t amber anim"><div class="tk">Top gain</div><div class="val">+18<small> lb</small></div><div class="sub2">Back Squat e1RM</div></div>
+            <div class="t sky anim"><div class="tk">Milestone</div><div class="val">100</div><div class="sub2">sessions logged &check;</div></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Pr2 feed -->
+    <div class="col">
+      <div class="tag">Pr2 &middot; Analytics feed<span>Header, then sections stacked: strength gains, volume, body weight, recent sessions. Most readable, story-like.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="body">
+          <div class="phead anim"><span class="av">S</span><div><div class="nm">Sam Lans</div><div class="sub">Intermediate &middot; 128 sessions</div></div><span class="rng">8 weeks &rsaquo;</span></div>
+          <div class="sech anim">Top strength gains <span class="tr">est. 1RM</span></div>
+          <div class="gain anim"><div><div class="nm">Back Squat</div><div class="e">315 &rarr; 333 lb</div></div><span class="minibar"><i style="width:82%"></i></span><span class="d">+18<small> lb</small></span></div>
+          <div class="gain anim"><div><div class="nm">Deadlift</div><div class="e">405 &rarr; 420 lb</div></div><span class="minibar"><i style="width:70%"></i></span><span class="d">+15<small> lb</small></span></div>
+          <div class="gain anim"><div><div class="nm">Bench Press</div><div class="e">225 &rarr; 237 lb</div></div><span class="minibar"><i style="width:58%"></i></span><span class="d">+12<small> lb</small></span></div>
+          <div class="sech anim">Volume vs landmarks <span class="tr">sets / wk</span></div>
+          <div class="t dark anim" style="border-radius:16px">
+            <div class="lmrow" style="margin-top:2px"><div class="lmhead"><span class="mg">Quads</span><span class="ct">18 / 22</span></div><div class="lmtrack"><div class="fill" style="width:75%;background:var(--good)"></div><div class="tick" style="left:45%"></div><div class="tick" style="left:78%"></div></div></div>
+            <div class="lmrow"><div class="lmhead"><span class="mg">Chest</span><span class="ct">13 / 18</span></div><div class="lmtrack"><div class="fill" style="width:54%;background:var(--mid)"></div><div class="tick" style="left:40%"></div><div class="tick" style="left:72%"></div></div></div>
+            <div class="lmrow"><div class="lmhead"><span class="mg">Rear delts</span><span class="ct">7 / 14</span></div><div class="lmtrack"><div class="fill" style="width:30%;background:var(--under)"></div><div class="tick" style="left:50%"></div><div class="tick" style="left:80%"></div></div></div>
+            <div class="lmleg"><i style="color:var(--under)">under</i><i style="color:var(--mid)">mid</i><i style="color:var(--good)">on target</i></div>
+          </div>
+          <div class="sech anim">Recent sessions</div>
+          <div class="cex anim"><div class="dot">&check;</div><div><div class="nm">Legs A</div><div class="sub">Tue &middot; 52 min &middot; +10 lb vol</div></div><span class="cnt">6 lifts</span></div>
+          <div class="cex anim"><div class="dot">&check;</div><div><div class="nm">Pull A</div><div class="sub">Mon &middot; 47 min</div></div><span class="cnt">7 lifts</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Pr3 hero stat -->
+    <div class="col">
+      <div class="tag">Pr3 &middot; Hero stat<span>One headline number leads (the streak), supporting stats below. Most motivating, least dense.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="body">
+          <div class="phead anim"><span class="av">S</span><div><div class="nm">Sam Lans</div><div class="sub">Intermediate &middot; 2 yr</div></div><span class="rng">All time &rsaquo;</span></div>
+          <div class="herostat anim">
+            <div class="hk">Current streak</div>
+            <div class="hv">6</div>
+            <div class="hs">weeks straight &middot; your longest yet &middot; 4.2 sessions / wk</div>
+          </div>
+          <div class="bento">
+            <div class="t card anim"><div class="tk">Body weight</div><div class="val">148.0<small> lb</small></div><div class="sub2" style="color:#1a7a3a">&#9660; 1.2 / mo</div></div>
+            <div class="t amber anim"><div class="tk">Top gain</div><div class="val">+18<small> lb</small></div><div class="sub2">Back Squat</div></div>
+            <div class="t sky anim"><div class="tk">Sessions</div><div class="val">128</div><div class="sub2">all time</div></div>
+            <div class="t coral anim"><div class="tk">Volume</div><div class="val">On<small> target</small></div><div class="sub2">within MAV</div></div>
+          </div>
+          <div class="sech anim">Latest milestone</div>
+          <div class="cex anim"><div class="dot" style="background:#ffe9c2;color:#8a5a00">&#9733;</div><div><div class="nm">Two-plate squat for reps</div><div class="sub">225 &times; 8 &middot; last Thursday</div></div></div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <b>Tools, reconciled:</b> design-review rates <b>Pr2</b> highest for an analytics home, labelled sections and clear units beat a dense tile wall for comprehension (Nielsen #8, aesthetic &amp; minimalist, and #6 recognition), and it wants the est-1RM gains near the top since that is the headline a lifter checks. impeccable pushes back that a pure feed under-uses the brand, and loves <b>Pr1</b>'s bento energy but flags the risk of the hero-metric cliche in <b>Pr3</b> if the big number is vanity. Verdict: <b>Pr2 as the spine</b> (strength gains first), with <b>Pr1's colour tiles</b> for the top-line stats, a feed with bento at the top. Pr3's single hero only if the number is always meaningful (streak works; a vanity total does not). Your call on which to converge.
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function play(){
+    document.querySelectorAll('.phone').forEach(function(ph){
+      var items=ph.querySelectorAll('.anim');
+      if(RM){gsap.set(items,{opacity:1});return;}
+      gsap.fromTo(items,{opacity:0,y:16},{opacity:1,y:0,duration:.5,stagger:{each:.07,amount:.55},ease:'expo.out',clearProps:'transform'});
+    });
+  }
+  document.getElementById('replay').addEventListener('click',play);
+  window.addEventListener('load',play); play();
+})();
+</script>
