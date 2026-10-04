@@ -1,0 +1,279 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Confirm These</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --bg:#efece3; --ink:#1a1813; --muted:#6f6c62; --line:#d8d5ca; --surface:#fff;
+  --accent:#ff6b5e; --onaccent:#2a0b07; --hero:#1a1813; --onhero:#fff;
+  --amber:#ffc247; --sky:#8fd3e8; --lime:#bfe39a; --violet:#c9b8f0;
+  --under:#dc3b2e; --mid:#e8a21a; --good:#3fa65a;
+  --shadow:0 24px 60px -30px rgba(20,18,12,.6); color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121210; --ink:#f2f0e9; --muted:#9c988c; --line:#2c2a25; --surface:#1c1b17;
+  --accent:#ff8a6a; --onaccent:#2a0b07; --hero:#060604; --onhero:#f2f0e9;
+  --shadow:0 24px 60px -24px rgba(0,0,0,.75); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#121210; --ink:#f2f0e9; --muted:#9c988c; --line:#2c2a25; --surface:#1c1b17;
+  --accent:#ff8a6a; --onaccent:#2a0b07; --hero:#060604; --onhero:#f2f0e9;
+  --shadow:0 24px 60px -24px rgba(0,0,0,.75); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:40px 80px}
+.kicker{font:800 11px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(30px,7vw,46px)/1.02 "Bricolage Grotesque";letter-spacing:-.03em;margin:12px 0 8px}
+.lede{color:var(--muted);max-width:60ch;margin:0;font-size:15px}
+h2{font:800 clamp(20px,4vw,26px)/1.1 "Bricolage Grotesque";letter-spacing:-.02em;margin:0 0 4px}
+.sec{margin-top:46px;padding-top:26px;border-top:1px solid var(--line)}
+.q{color:var(--muted);font-size:14px;margin:0 0 18px}
+.q b{color:var(--ink)}
+.rec{display:inline-block;font:800 10px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase;color:var(--good);border:1px solid color-mix(in srgb,var(--good) 45%,transparent);border-radius:999px;padding:4px 8px;margin-left:8px;vertical-align:middle}
+
+/* device */
+.phone{width:300px;max-width:100%;background:var(--surface);border-radius:30px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden;position:relative}
+.phone .face{aspect-ratio:9/17.5;position:relative;overflow:hidden;background:var(--bg)}
+.stage2{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+
+/* top bars */
+.tbopt{flex:1;min-width:260px}
+.tbopt .cap{font-size:13px;color:var(--muted);margin:0 0 8px}
+.tbopt .cap b{color:var(--ink)}
+.topbar{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:10px 10px 6px;display:flex;align-items:flex-end;gap:4px}
+.chip{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px 4px;border-radius:10px;cursor:default}
+.chip.on{background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.chip .ic{width:18px;height:18px;border-radius:5px;background:var(--muted)}
+.chip.on .ic{background:var(--ink)}
+.chip.home .ic{background:var(--accent)}
+.chip .lb{font:700 9px/1 "Hanken Grotesk";color:var(--muted)}
+.chip.on .lb{color:var(--ink)}
+.chip .tick{width:20px;height:3px;background:var(--line);transform:skewX(-20deg)}
+.chip.on .tick{background:var(--accent)}
+.rightgrp{display:flex;align-items:center;gap:8px;padding:0 2px 8px}
+.bell,.ava{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+.bell{background:var(--surface);border:1px solid var(--line);position:relative}
+.bell svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:2}
+.bell .dot{position:absolute;top:3px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--accent);border:1.5px solid var(--bg)}
+.ava{background:var(--hero);color:var(--onhero);font:800 12px/1 "Bricolage Grotesque"}
+
+/* popup demo */
+.popdemo{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.popctl{flex:1;min-width:220px}
+.stylerow{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.sbtn{font:800 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:11px 15px;cursor:pointer;transition:.15s}
+.sbtn.active{background:var(--accent);color:var(--onaccent);border-color:transparent}
+.sdesc{font-size:13.5px;color:var(--muted);min-height:40px}
+.sdesc b{color:var(--ink)}
+
+.pface{background:var(--bg)}
+.pface .ph-hd{padding:14px 14px 0}
+.pface .ph-ttl{font:800 20px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.pface .ph-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.pface .ph-tile{margin:12px 14px;height:70px;border-radius:14px;background:var(--amber)}
+.pface .ph-tile.b{background:var(--sky)}
+.trigger{position:absolute;left:14px;right:14px;bottom:14px;height:46px;border-radius:14px;background:var(--hero);color:var(--onhero);border:0;font:800 14px/1 "Hanken Grotesk";cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.scrim{position:absolute;inset:0;background:rgba(10,9,7,.42);opacity:0;visibility:hidden}
+.scrim.blur{backdrop-filter:blur(3px)}
+.sheet{position:absolute;left:14px;right:14px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:16px;visibility:hidden}
+.sheet.center{top:50%}
+.sheet h4{font:800 17px/1 "Bricolage Grotesque";letter-spacing:-.01em;margin:0 0 3px}
+.sheet .sh-sub{font-size:11px;color:var(--muted);margin:0 0 14px}
+.opt{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+.opt:last-child{margin-bottom:0}
+.opt .om{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font:800 15px/1 "Bricolage Grotesque";flex:0 0 auto}
+.opt.a .om{background:var(--accent);color:var(--onaccent)}
+.opt.b .om{background:var(--violet);color:#241043}
+.opt .ot{font:700 14px/1.2 "Hanken Grotesk"}
+.opt .os{font-size:11.5px;color:var(--muted)}
+
+/* direction cards */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.dcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.dcard h3{font:800 16px/1.1 "Bricolage Grotesque";letter-spacing:-.01em;margin:0}
+.dcard p{margin:0;font-size:13px;color:var(--muted)}
+.dcard .opts{font-size:12.5px;color:var(--ink);margin:2px 0 0}
+.dcard a{margin-top:auto;color:var(--accent);font-weight:800;text-decoration:none;font-size:13px;padding-top:6px}
+.quote{font-family:"Newsreader",Georgia,serif;font-style:italic;font-size:17px;color:var(--muted);margin:28px 0 0}
+.foot{margin-top:40px;font-size:13px;color:var(--muted)}
+.foot a{color:var(--accent);font-weight:800;text-decoration:none}
+</style>
+
+<div class="wrap">
+  <span class="kicker">SamsisFit · redesign</span>
+  <h1>Confirm these four</h1>
+  <p class="lede">Fonts are done (you're reading Bricolage + Hanken + Newsreader, the real app faces). These are the open calls. Try the pop-ups, eyeball the top bar, skim the three builder directions, then reply with a pick per section.</p>
+
+  <!-- 1. TOP BAR -->
+  <section class="sec">
+    <h2>1 · Top navigation <span class="rec">rec: 3-zone + Lift</span></h2>
+    <p class="q">The app ships <b>five</b> zone chips. The redesign collapses to <b>three</b> + a bell + your avatar, which means merging Train &amp; Plan into one <b>Lift</b> hub and moving profile/settings behind the avatar. <b>3 or 5? Lift or Work?</b></p>
+    <div class="stage2">
+      <div class="tbopt">
+        <p class="cap">Current · <b>five chips</b></p>
+        <div class="topbar">
+          <div class="chip home on"><span class="ic"></span><span class="lb">Your Day</span><span class="tick"></span></div>
+          <div class="chip"><span class="ic"></span><span class="lb">Train</span><span class="tick"></span></div>
+          <div class="chip"><span class="ic"></span><span class="lb">Eat</span><span class="tick"></span></div>
+          <div class="chip"><span class="ic"></span><span class="lb">Plan</span><span class="tick"></span></div>
+          <div class="chip"><span class="ic"></span><span class="lb">You</span><span class="tick"></span></div>
+        </div>
+      </div>
+      <div class="tbopt">
+        <p class="cap">Proposed · <b>three chips + bell + avatar</b></p>
+        <div class="topbar">
+          <div class="chip home on"><span class="ic"></span><span class="lb">Your Day</span><span class="tick"></span></div>
+          <div class="chip"><span class="ic"></span><span class="lb">Eat</span><span class="tick"></span></div>
+          <div class="chip"><span class="ic"></span><span class="lb">Lift</span><span class="tick"></span></div>
+          <div class="rightgrp">
+            <span class="bell"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="dot"></span></span>
+            <span class="ava">S</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. POPUPS -->
+  <section class="sec">
+    <h2>2 · Pop-up style <span class="rec">rec: Spotlight</span></h2>
+    <p class="q">The pick-one moment (Build → Routine / Mesocycle, routine → Start / Edit, avatar → Progress / Settings, notifications). <b>No drag bar.</b> Tap a style, then tap <b>Build a…</b> to feel it. Which should be the default?</p>
+    <div class="popdemo">
+      <div class="popctl">
+        <div class="stylerow">
+          <button class="sbtn active" data-style="spotlight">Spotlight</button>
+          <button class="sbtn" data-style="deal">Deal</button>
+          <button class="sbtn" data-style="split">Split</button>
+          <button class="sbtn" data-style="grow">Grows-from-tap</button>
+        </div>
+        <p class="sdesc" id="sdesc"><b>Spotlight.</b> Centred sheet scales up from 86% as the page behind dims and blurs. Calm, focused, reads as "decide this now." My default pick.</p>
+      </div>
+      <div class="phone" style="width:270px">
+        <div class="face pface" id="pface">
+          <div class="ph-hd"><div class="ph-ttl">Lift</div><div class="ph-sub">Push / Pull / Legs · Week 2</div></div>
+          <div class="ph-tile"></div>
+          <div class="ph-tile b"></div>
+          <button class="trigger" id="trigger">+ Build a…</button>
+          <div class="scrim" id="scrim"></div>
+          <div class="sheet center" id="sheet">
+            <h4>Build a…</h4>
+            <p class="sh-sub">Start something new</p>
+            <div class="opt a"><span class="om">R</span><span><span class="ot">Routine</span><br><span class="os">A single reusable workout</span></span></div>
+            <div class="opt b"><span class="om">M</span><span><span class="ot">Mesocycle</span><br><span class="os">A multi-week training block</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3/4/5 DIRECTIONS -->
+  <section class="sec">
+    <h2>3 · Mesocycle builder, Profile, Settings</h2>
+    <p class="q">Each has a few directions already drawn. Open the full interactive artifact and tell me the pick (my lean is tagged).</p>
+    <div class="dgrid">
+      <div class="dcard">
+        <h3>Mesocycle builder</h3>
+        <p>How you set up a multi-week block.</p>
+        <p class="opts"><b>Lean:</b> P1 stepped wizard for a first block, P2 single-scroll for edits. Shared day-builder (set×rep@RIR, supersets as a labelled group).</p>
+        <a href="https://claude.ai/artifact/9UK3i7jBTiekmtwANLBTFx" target="_blank">Open directions →</a>
+      </div>
+      <div class="dcard">
+        <h3>Profile / Progress</h3>
+        <p>Reached from the avatar menu.</p>
+        <p class="opts"><b>Lean:</b> Pr2 feed spine (strength gains by est. 1RM first) + colour stat tiles. Volume-vs-landmarks uses the red/amber/green status scale.</p>
+        <a href="https://claude.ai/artifact/NEPE13sRZpMgbH1iSo9R3t" target="_blank">Open directions →</a>
+      </div>
+      <div class="dcard">
+        <h3>Settings</h3>
+        <p>Devices, units, accent, theme, notifications.</p>
+        <p class="opts"><b>Lean:</b> SeA grouped list with SeB device cards on top. Monogram device marks, text status, no emoji or dots.</p>
+        <a href="https://claude.ai/artifact/LUNtw6yinia6B1aGdKVNew" target="_blank">Open directions →</a>
+      </div>
+    </div>
+  </section>
+
+  <p class="quote">"The last three or four reps is what makes the muscle grow." Set in Newsreader, the app's quote face.</p>
+
+  <p class="foot">Context: <a href="https://claude.ai/artifact/BQt9k2YrTUDcuPB36UaVXJ" target="_blank">full simulation</a> · <a href="https://claude.ai/artifact/AjmDBDmUQ38xdzz8Uh4VRK" target="_blank">build spec</a> · <a href="https://github.com/samlans/samisfit/pull/213" target="_blank">code PR #213</a></p>
+</div>
+
+<script>
+(function(){
+  var style="spotlight", open=false;
+  var scrim=document.getElementById('scrim'), sheet=document.getElementById('sheet'),
+      trigger=document.getElementById('trigger'), pface=document.getElementById('pface'),
+      sdesc=document.getElementById('sdesc');
+  var DESC={
+    spotlight:"<b>Spotlight.</b> Centred sheet scales up from 86% as the page behind dims and blurs. Calm, focused, reads as \"decide this now.\" My default pick.",
+    deal:"<b>Deal.</b> The two option rows deal in from alternating sides and settle stacked, like cards hitting a table. Playful, draws the eye to the choices themselves.",
+    split:"<b>Split.</b> The sheet's halves fly in from top and bottom and meet in the middle. Energetic, a little more dramatic.",
+    grow:"<b>Grows-from-tap.</b> The sheet expands out of the button you pressed, so the choice feels physically spawned by the tap. Best when the trigger has a fixed home (the avatar menu)."
+  };
+  var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('.sbtn').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.sbtn').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active'); style=b.dataset.style; sdesc.innerHTML=DESC[style];
+      if(open) closeSheet();
+    });
+  });
+
+  function reset(){ gsap.set(sheet,{clearProps:'all'}); gsap.set(pface,{clearProps:'filter,transform'}); }
+  function layout(){
+    // centre vs anchor baseline
+    sheet.style.top="50%";
+    gsap.set(sheet,{yPercent:-50,transformOrigin:'50% 50%'});
+  }
+  function openSheet(){
+    if(open) return; open=true;
+    var opts=sheet.querySelectorAll('.opt');
+    reset(); layout();
+    scrim.style.visibility='visible'; sheet.style.visibility='visible';
+    if(RM){ gsap.set([scrim,sheet],{opacity:1}); return; }
+    var tl=gsap.timeline();
+    tl.to(scrim,{opacity:1,duration:.28},0);
+    if(style==='spotlight'){
+      scrim.classList.add('blur');
+      gsap.set(sheet,{opacity:0,scale:.86,yPercent:-50});
+      tl.to(sheet,{opacity:1,scale:1,duration:.42,ease:'back.out(1.3)'},.02);
+      tl.to(pface,{scale:.97,filter:'brightness(.86)',duration:.42,ease:'power3.out'},0);
+    } else if(style==='deal'){
+      scrim.classList.remove('blur');
+      gsap.set(sheet,{opacity:1,scale:1,yPercent:-50});
+      gsap.set(opts,{opacity:0});
+      gsap.fromTo(opts[0],{x:-180,rotate:-8,opacity:0},{x:0,rotate:0,opacity:1,duration:.4,ease:'power3.out',delay:.06});
+      gsap.fromTo(opts[1],{x:180,rotate:8,opacity:0},{x:0,rotate:0,opacity:1,duration:.4,ease:'power3.out',delay:.14});
+      gsap.set(sheet,{opacity:0}); tl.to(sheet,{opacity:1,duration:.2},0);
+    } else if(style==='split'){
+      scrim.classList.remove('blur');
+      gsap.set(sheet,{opacity:0,scaleY:.2,yPercent:-50,transformOrigin:'50% 50%'});
+      tl.to(sheet,{opacity:1,scaleY:1,duration:.4,ease:'power4.out'},.02);
+      var h=sheet.querySelector('h4'), sub=sheet.querySelector('.sh-sub');
+      gsap.fromTo([h,sub],{y:-14,opacity:0},{y:0,opacity:1,duration:.32,ease:'power2.out',delay:.12,stagger:.04});
+      gsap.fromTo(opts,{y:16,opacity:0},{y:0,opacity:1,duration:.32,ease:'power2.out',delay:.16,stagger:.05});
+    } else { // grow from trigger
+      scrim.classList.add('blur');
+      var tr=trigger.getBoundingClientRect(), fr=pface.getBoundingClientRect();
+      var ox=((tr.left+tr.width/2)-fr.left)/fr.width*100;
+      gsap.set(sheet,{opacity:0,scale:.3,yPercent:-50,transformOrigin:ox+'% 120%'});
+      tl.to(sheet,{opacity:1,scale:1,duration:.46,ease:'back.out(1.2)'},.02);
+      tl.to(pface,{scale:.98,filter:'brightness(.9)',duration:.42,ease:'power3.out'},0);
+    }
+  }
+  function closeSheet(){
+    if(!open) return; open=false;
+    function done(){ scrim.style.visibility='hidden'; sheet.style.visibility='hidden'; scrim.classList.remove('blur'); reset(); }
+    if(RM){ gsap.set([scrim,sheet],{opacity:0}); done(); return; }
+    var tl=gsap.timeline({onComplete:done});
+    tl.to(sheet,{opacity:0,scale:.92,duration:.24,ease:'power2.in'},0);
+    tl.to(scrim,{opacity:0,duration:.26},0);
+    tl.to(pface,{scale:1,filter:'brightness(1)',duration:.3,ease:'power2.out'},0);
+  }
+  trigger.addEventListener('click',openSheet);
+  scrim.addEventListener('click',closeSheet);
+})();
+</script>
