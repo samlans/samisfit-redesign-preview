@@ -23,6 +23,9 @@ h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercas
 .card:hover{transform:translateY(-3px)}
 .card .swatch{height:78px;display:flex;align-items:flex-end;padding:12px 14px;position:relative}
 .card .swatch .n{font:800 11px/1 "Hanken Grotesk";letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.9)}
+.card.feature{grid-column:1/-1}
+.card.feature .swatch{height:94px}
+@media(min-width:640px){.card.feature{flex-direction:row;align-items:stretch}.card.feature .swatch{width:40%;height:auto;min-height:150px}.card.feature .b{flex:1;justify-content:center;padding:22px 24px}.card.feature .t{font-size:26px}.card.feature .d{font-size:14px;max-width:48ch}}
 .card .b{padding:14px 15px 16px;display:flex;flex-direction:column;gap:7px;flex:1}
 .card .t{font:800 19px/1.05 "Bricolage Grotesque";letter-spacing:-.01em}
 .card .d{font:600 12.5px/1.45 "Hanken Grotesk";color:var(--muted)}
@@ -62,6 +65,10 @@ h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercas
 
   <h2>Screens</h2>
   <div class="screens">
+    <a class="card feature" href="flash.html" >
+      <div class="swatch sw-flash"><span class="n">Navigation</span></div>
+      <div class="b"><div class="t">Main navigation</div><div class="d">How you move through the app: the radial Sunset flash that plays when you switch zones, the motion backbone every screen shares. (The matching pop-up + parallax system for "pick an option" moments lives on the Lift page.)</div><span class="st done">Locked &middot; motion backbone</span><span class="go">Open &rarr;</span></div>
+    </a>
     <a class="card" href="yourday.html" >
       <div class="swatch sw-day"><span class="n">Home hub</span></div>
       <div class="b"><div class="t">Your Day</div><div class="d">Up-next workout hero with the mesocycle week tracker, fuel, weigh-in, meals, steps, and a quote of the day.</div><span class="st done">Converged</span><span class="go">Open &rarr;</span></div>
@@ -85,10 +92,6 @@ h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercas
     <a class="card" href="settings.html" >
       <div class="swatch" style="background:linear-gradient(135deg,#1a1813 0 52%,#8fd3e8 52%)"><span class="n">Account</span></div>
       <div class="b"><div class="t">Settings</div><div class="d">Link watch &amp; health services, units, accent, theme, notifications, account. Reached from the avatar menu.</div><span class="st round">Round one &middot; 2 options</span><span class="go">Open &rarr;</span></div>
-    </a>
-    <a class="card" href="flash.html" >
-      <div class="swatch sw-flash"><span class="n">Motion</span></div>
-      <div class="b"><div class="t">Flash transition lab</div><div class="d">The radial + Sunset screen transition we locked, with the other shapes and colours banked for later.</div><span class="st lab">Lab &middot; radial + Sunset locked</span><span class="go">Open &rarr;</span></div>
     </a>
   </div>
 
