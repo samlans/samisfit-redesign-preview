@@ -59,12 +59,16 @@ h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercas
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap">
 
 <div class="wrap">
-  <span class="eyebrow">SamsisFit [Title Pending] &middot; Redesign &middot; everything so far</span>
-  <h1>UI Mockups</h1>
-  <p class="lede">Tap a card to open that screen</p>
+  <span class="eyebrow">SamsisFit &middot; Redesign &middot; everything so far</span>
+  <h1>Every screen we reworked</h1>
+  <p class="lede">The full set from this session, all in the one new language. Tap a card to open that screen's artifact in a new tab. Converged = a single resolved screen; round one = directions still to pick from.</p>
 
   <h2>Screens</h2>
   <div class="screens">
+    <a class="card feature" href="simulation.html" >
+      <div class="swatch" style="background:linear-gradient(135deg,#1a1813 0 38%,#ff6b5e 38% 68%,#8fd3e8 68%)"><span class="n">Live</span></div>
+      <div class="b"><div class="t">Full app simulation</div><div class="d">The whole app, navigable. Tab between Your Day / Eat / Lift with the flash transition, open the notifications bell and avatar menu, use the Lift pop-ups, and log a full workout with rest. Start here.</div><span class="st done">Walk the whole app</span><span class="go">Open &rarr;</span></div>
+    </a>
     <a class="card feature" href="flash.html" >
       <div class="swatch sw-flash"><span class="n">Navigation</span></div>
       <div class="b"><div class="t">Main navigation</div><div class="d">How you move through the app: the radial Sunset flash that plays when you switch zones, the motion backbone every screen shares. (The matching pop-up + parallax system for "pick an option" moments lives on the Lift page.)</div><span class="st done">Locked &middot; motion backbone</span><span class="go">Open &rarr;</span></div>
@@ -76,6 +80,10 @@ h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercas
     <a class="card" href="lift.html" >
       <div class="swatch sw-start"><span class="n">Main page</span></div>
       <div class="b"><div class="t">Lift</div><div class="d">Today's session, your routines, Build / Empty / Templates. Tap a routine for Start or Edit, tap Build for Routine or Mesocycle. Interactive pop-up + parallax system.</div><span class="st done">Converged &middot; interactive</span><span class="go">Open &rarr;</span></div>
+    </a>
+    <a class="card" href="eat.html" >
+      <div class="swatch" style="background:linear-gradient(135deg,#1a1813 0 50%,#ff6b5e 50%)"><span class="n">Nutrition</span></div>
+      <div class="b"><div class="t">Eat</div><div class="d">Calories left, protein / carbs / fat, meals and add-food (search, scan, recent). Ring dashboard confirmed.</div><span class="st done">Confirmed &middot; ring dashboard</span><span class="go">Open &rarr;</span></div>
     </a>
     <a class="card" href="active-workout.html" >
       <div class="swatch sw-aw"><span class="n">Live session</span></div>
@@ -122,6 +130,6 @@ h2{font:800 13px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercas
   </div>
 
   <div class="foot">
-    <b>Where things stand:</b> Your Day, Active Workout and the Lift main page are converged (Lift carries the shared pop-up + parallax system); Mesocycle builder, Profile and Settings are round-one direction sets awaiting your pick. The <b>status colours</b> (under / mid / on-target) are now a shared token set, so logged weights, progression and volume all speak the same language. Tell me which directions to converge and I'll finish them and wire the real destinations.
+    <b>Where things stand:</b> Your Day, Eat, Active Workout and Lift are converged, and the <b>Full app simulation</b> stitches them into one navigable walkthrough with the notifications bell and avatar menu. Mesocycle builder, Profile and Settings still have round-one direction sets to pick from (my leans are in each). The <b>status colours</b> (under / mid / on-target) are a shared token set, so logged weights, progression and volume all speak the same language. Next: the Compose rebuild, screen by screen, verified on device.
   </div>
 </div>

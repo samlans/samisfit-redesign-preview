@@ -1,0 +1,226 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eat Directions</title>
+<style>
+/* ============================================================
+   SamsisFit - Eat / nutrition, directions in the new language.
+   Daily fuel (calories left vs target), macros, meals + entries,
+   add food (search / scan / recent). Monogram food chips, no emoji.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --under:#dc3b2e;--mid:#e8a21a;--good:#3fa65a;--pro:#ff6b5e;--carb:#ffc247;--fat:#8fd3e8;
+  --shadow:0 26px 60px -30px rgba(20,18,12,.6);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 26px 60px -24px rgba(0,0,0,.78)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:40px 72px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,46px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:13px 0 10px;text-wrap:balance}
+.lede{max-width:74ch;color:var(--muted);font-size:15px;line-height:1.6;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 2px}
+.btn{font:700 13px/1 "Hanken Grotesk";border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:flex;flex-wrap:wrap;gap:30px;justify-content:center;margin-top:28px}
+.col{width:320px;max-width:100%;display:flex;flex-direction:column;gap:12px}
+.tag{font:800 14px/1.3 "Bricolage Grotesque";letter-spacing:-.01em}
+.tag span{display:block;font:600 12px/1.45 "Hanken Grotesk";color:var(--muted);margin-top:4px}
+.tag em{font-style:normal;color:var(--accent)}
+
+.phone{width:100%;aspect-ratio:9/19.5;border-radius:38px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.08)}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#efece3;color:#1b1a17}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:11px 20px 2px;font-size:11.5px;font-weight:700;flex:none}
+.sb .r{font-size:10px;opacity:.85}
+.head{display:flex;align-items:center;gap:9px;padding:6px 16px 8px;flex:none}
+.head .t{font:800 23px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.head .me{margin-left:auto;width:30px;height:30px;border-radius:50%;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 12px/1 "Bricolage Grotesque"}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;padding:2px 13px 12px;overflow:hidden}
+.sech{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;color:#9a9488;padding:5px 2px 0}
+
+/* fuel hero */
+.fuel{background:#1a1813;color:#fff;border-radius:22px;padding:17px}
+.fuel .k{font:800 10px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:#ff9d6a}
+.fuel .big{font:800 44px/1 "Bricolage Grotesque";letter-spacing:-.03em;margin:8px 0 2px}
+.fuel .big small{font-size:13px;color:rgba(255,255,255,.55);font-weight:700;letter-spacing:0}
+.fuel .sub{font:600 11.5px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.6)}
+.cbar{height:8px;border-radius:999px;background:rgba(255,255,255,.14);margin:11px 0 0;overflow:hidden}
+.cbar i{display:block;height:100%;width:37%;background:#ff6b5e;border-radius:999px}
+.macros{display:flex;gap:9px;margin-top:13px}
+.macro{flex:1}
+.macro .ml{display:flex;justify-content:space-between;font:700 10px/1 "Hanken Grotesk";color:rgba(255,255,255,.72);margin-bottom:5px}
+.macro .ml b{color:#fff;font-weight:800}
+.mbar{height:5px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+.mbar i{display:block;height:100%;border-radius:999px}
+
+/* ring */
+.ringwrap{display:flex;flex-direction:column;align-items:center;background:#1a1813;color:#fff;border-radius:22px;padding:18px 16px}
+.ring{width:150px;height:150px;border-radius:50%;position:relative;background:conic-gradient(#ff6b5e 0 37%, rgba(255,255,255,.12) 37% 100%)}
+.ring::after{content:"";position:absolute;inset:15px;border-radius:50%;background:#1a1813}
+.ring b{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.ring .rn{font:800 34px/1 "Bricolage Grotesque";letter-spacing:-.03em}
+.ring .rl{font:700 9px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:5px}
+.mrings{display:flex;gap:16px;margin-top:15px}
+.mring{text-align:center}
+.mring .d{width:46px;height:46px;border-radius:50%;position:relative;margin:0 auto}
+.mring .d::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#1a1813}
+.mring .v{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font:800 12px/1 "Bricolage Grotesque"}
+.mring .lb{font:700 9px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:6px}
+
+/* meal cards */
+.meal{background:#fff;border:1px solid #e6e3d9;border-radius:16px;padding:12px 13px}
+.meal .mh{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+.meal .mn{font:800 14px/1 "Bricolage Grotesque";letter-spacing:-.01em}
+.meal .mk{margin-left:auto;font:800 13px/1 "Bricolage Grotesque"}
+.meal .mk small{font-size:9px;color:#9a9488;font-weight:700}
+.fitem{display:flex;align-items:center;gap:10px;padding:6px 0}
+.fitem .fc{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";flex:none}
+.fc.oat{background:#f3e7cf;color:#8a6a2a}.fc.fruit{background:#ffe6c7;color:#b4701f}.fc.meat{background:#ffd9d4;color:#b4442e}.fc.dairy{background:#e7edf6;color:#3b5c86}.fc.veg{background:#e3f0da;color:#3f7a2e}
+.fitem .fn{font:700 12.5px/1.1 "Hanken Grotesk"}
+.fitem .fs{font:600 10.5px/1.2 "Hanken Grotesk";color:#9a9488;margin-top:2px}
+.fitem .fk{margin-left:auto;font:800 12px/1 "Bricolage Grotesque";color:#1b1a17}
+.meal.empty{border-style:dashed;color:#9a9488;display:flex;align-items:center;gap:10px}
+.meal.empty .pl{width:30px;height:30px;border-radius:9px;background:#f1ece0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#b4ae9f}
+.meal.empty .mn{color:#9a9488}
+
+/* add bar */
+.addbar{display:flex;gap:9px;margin-top:auto}
+.addbar .afind{flex:1;background:#ff6b5e;color:#2a0b07;border:0;border-radius:14px;padding:13px;font:800 14px/1 "Hanken Grotesk";display:flex;align-items:center;justify-content:center;gap:8px}
+.addbar .scan{width:48px;border:1px solid #e6e3d9;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#6f6c62}
+.chiprow{display:flex;gap:7px;overflow:hidden}
+.qchip{flex:none;background:#fff;border:1px solid #e6e3d9;border-radius:12px;padding:8px 11px;font:700 11.5px/1 "Hanken Grotesk";display:flex;align-items:center;gap:7px}
+.qchip .fc{width:22px;height:22px;border-radius:7px;font-size:9px}
+.coach{background:#eef6df;border:1px solid #cfe6a6;border-radius:15px;padding:12px 13px;font:600 12px/1.4 "Hanken Grotesk";color:#3b5a16}
+.coach b{color:#2a4010;font-weight:800}
+
+.handle{flex:none;display:flex;justify-content:center;padding:4px 0 9px}
+.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+.foot{max-width:74ch;margin:30px auto 0;color:var(--muted);font-size:13.5px;line-height:1.65;text-align:center}
+.foot b{color:var(--ink)}
+.anim{opacity:0}
+@media (prefers-reduced-motion:reduce){.anim{opacity:1!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Eat &middot; round one</span>
+  <h1>The food day, three reads</h1>
+  <p class="lede">Eat is the nutrition home: <b>calories left against today's target</b> (from the adaptive TDEE engine), <b>protein / carbs / fat</b> progress, your <b>meals and their entries</b>, and fast <b>add-food</b> (search, scan, recent). Monogram food chips, not emoji. Macro colours: protein coral, carbs amber, fat sky.</p>
+  <div class="bar"><button class="btn" id="replay">&#8635; Replay motion</button><span class="note">Targets are engine-driven &middot; over-budget turns the calorie bar red &middot; reduced-motion safe</span></div>
+
+  <div class="grid">
+
+    <!-- E1 fuel-first list -->
+    <div class="col">
+      <div class="tag">E1 &middot; Fuel-first list<span>Calories + macros in one dark hero, then meals, then a sticky add-food bar. Fewest taps to log.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="t">Eat</span><span class="me">S</span></div>
+        <div class="body">
+          <div class="fuel anim">
+            <div class="k">Calories left</div>
+            <div class="big">1,502<small> of 2,400</small></div>
+            <div class="sub">898 eaten &middot; 500 burned back</div>
+            <div class="cbar"><i></i></div>
+            <div class="macros">
+              <div class="macro"><div class="ml"><span>Protein</span><b>88/165</b></div><div class="mbar"><i style="width:53%;background:var(--pro)"></i></div></div>
+              <div class="macro"><div class="ml"><span>Carbs</span><b>96/240</b></div><div class="mbar"><i style="width:40%;background:var(--carb)"></i></div></div>
+              <div class="macro"><div class="ml"><span>Fat</span><b>24/70</b></div><div class="mbar"><i style="width:34%;background:var(--fat)"></i></div></div>
+            </div>
+          </div>
+          <div class="meal anim"><div class="mh"><span class="mn">Breakfast</span><span class="mk">612<small> kcal</small></span></div>
+            <div class="fitem"><span class="fc oat">OM</span><div><div class="fn">Oatmeal + whey</div><div class="fs">1 bowl &middot; 38g protein</div></div><span class="fk">420</span></div>
+            <div class="fitem"><span class="fc fruit">BA</span><div><div class="fn">Banana</div><div class="fs">1 medium</div></div><span class="fk">192</span></div>
+          </div>
+          <div class="meal anim"><div class="mh"><span class="mn">Lunch</span><span class="mk">286<small> kcal</small></span></div>
+            <div class="fitem"><span class="fc meat">CB</span><div><div class="fn">Chicken &amp; rice bowl</div><div class="fs">1 serving &middot; 32g protein</div></div><span class="fk">286</span></div>
+          </div>
+          <div class="meal empty anim"><span class="pl">+</span><div><div class="mn">Dinner</div></div><span class="mk" style="margin-left:auto;color:#b4ae9f">Add</span></div>
+          <div class="addbar anim"><button class="afind">&#9906; Add food</button><button class="scan">&#9636;</button></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- E2 ring dashboard -->
+    <div class="col">
+      <div class="tag">E2 &middot; Ring dashboard<span>A big calorie ring with three macro rings under it. Most glanceable "how am I doing" read.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="t">Eat</span><span class="me">S</span></div>
+        <div class="body">
+          <div class="ringwrap anim">
+            <div class="ring"><b><span class="rn">1,502</span><span class="rl">kcal left</span></b></div>
+            <div class="mrings">
+              <div class="mring"><div class="d" style="background:conic-gradient(var(--pro) 0 53%, rgba(255,255,255,.12) 0)"><span class="v">88</span></div><div class="lb">Protein</div></div>
+              <div class="mring"><div class="d" style="background:conic-gradient(var(--carb) 0 40%, rgba(255,255,255,.12) 0)"><span class="v">96</span></div><div class="lb">Carbs</div></div>
+              <div class="mring"><div class="d" style="background:conic-gradient(var(--fat) 0 34%, rgba(255,255,255,.12) 0)"><span class="v">24</span></div><div class="lb">Fat</div></div>
+            </div>
+          </div>
+          <div class="sech anim">Today's meals</div>
+          <div class="meal anim"><div class="mh"><span class="mn">Breakfast</span><span class="mk">612</span></div>
+            <div class="fitem"><span class="fc oat">OM</span><div><div class="fn">Oatmeal + whey</div></div><span class="fk">420</span></div>
+            <div class="fitem"><span class="fc fruit">BA</span><div><div class="fn">Banana</div></div><span class="fk">192</span></div>
+          </div>
+          <div class="meal anim"><div class="mh"><span class="mn">Lunch</span><span class="mk">286</span></div>
+            <div class="fitem"><span class="fc meat">CB</span><div><div class="fn">Chicken &amp; rice bowl</div></div><span class="fk">286</span></div>
+          </div>
+          <div class="addbar anim"><button class="afind">&#9906; Add food</button><button class="scan">&#9636;</button></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- E3 coach -->
+    <div class="col">
+      <div class="tag">E3 &middot; Coach day <em>(fresh)</em><span>Same fuel hero, plus a one-line coach read and quick-add chips for your recent foods. Most guided.</span></div>
+      <div class="phone"><div class="scr">
+        <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+        <div class="head"><span class="t">Eat</span><span class="me">S</span></div>
+        <div class="body">
+          <div class="fuel anim">
+            <div class="k">Calories left</div>
+            <div class="big">1,502<small> of 2,400</small></div>
+            <div class="cbar"><i></i></div>
+            <div class="macros">
+              <div class="macro"><div class="ml"><span>Protein</span><b>88/165</b></div><div class="mbar"><i style="width:53%;background:var(--pro)"></i></div></div>
+              <div class="macro"><div class="ml"><span>Carbs</span><b>96/240</b></div><div class="mbar"><i style="width:40%;background:var(--carb)"></i></div></div>
+              <div class="macro"><div class="ml"><span>Fat</span><b>24/70</b></div><div class="mbar"><i style="width:34%;background:var(--fat)"></i></div></div>
+            </div>
+          </div>
+          <div class="coach anim">On track. About <b>1,500 kcal</b> left fits a full dinner, aim for <b>~70g protein</b> to close the gap.</div>
+          <div class="sech anim">Quick add &middot; recent</div>
+          <div class="chiprow anim">
+            <div class="qchip"><span class="fc dairy">GY</span>Greek yogurt</div>
+            <div class="qchip"><span class="fc meat">CB</span>Chicken bowl</div>
+            <div class="qchip"><span class="fc veg">SA</span>Salad</div>
+          </div>
+          <div class="meal anim"><div class="mh"><span class="mn">Breakfast</span><span class="mk">612</span></div>
+            <div class="fitem"><span class="fc oat">OM</span><div><div class="fn">Oatmeal + whey</div></div><span class="fk">420</span></div>
+          </div>
+          <div class="addbar anim"><button class="afind">&#9906; Add food</button><button class="scan">&#9636;</button></div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <b>Tools, reconciled:</b> design-review backs <b>E1</b>, calories + macros in one read then meals is the fastest, most legible log (Nielsen #6, and clear unit labels). impeccable likes the <b>E2</b> ring as the brand-energy moment but warns a ring hides the per-gram numbers a tracker needs, so keep it as a header, not the whole screen. <b>E3</b>'s coach line and quick-add chips are the differentiator (this is a coached app), worth folding in. Verdict: <b>E1 as the spine, with E3's coach line + quick-add chips, and E2's ring available as a compact header variant</b>. Monogram food chips replace emoji everywhere.
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function play(){
+    document.querySelectorAll('.phone').forEach(function(ph){
+      var items=ph.querySelectorAll('.anim');
+      if(RM){gsap.set(items,{opacity:1});return;}
+      gsap.fromTo(items,{opacity:0,y:16},{opacity:1,y:0,duration:.5,stagger:{each:.07,amount:.55},ease:'expo.out',clearProps:'transform'});
+    });
+  }
+  document.getElementById('replay').addEventListener('click',play);
+  window.addEventListener('load',play); play();
+})();
+</script>

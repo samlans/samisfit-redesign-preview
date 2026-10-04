@@ -1,0 +1,550 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SamsisFit Simulation</title>
+<style>
+/* ============================================================
+   SamsisFit - full navigable simulation. Your Day / Eat / Lift
+   zones (radial-Sunset flash between them), avatar menu to
+   Profile & Settings, Lift option pop-ups (no drag bar), and
+   the Active Workout logging flow. Converged, one language.
+   ============================================================ */
+:root{--bg:#e9e7df;--ink:#1b1a17;--muted:#6f6c62;--line:#d8d5ca;--accent:#c23b16;--chip:#fff;
+  --under:#dc3b2e;--mid:#e8a21a;--good:#3fa65a;--pro:#ff6b5e;--carb:#ffc247;--fat:#8fd3e8;
+  --shadow:0 34px 80px -34px rgba(20,18,12,.62);color-scheme:light;--e-expo:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 34px 80px -30px rgba(0,0,0,.82)}}
+:root[data-theme="dark"]{--bg:#121210;--ink:#f2f0e9;--muted:#9c988c;--line:#2c2a25;--accent:#ff8a6a;--chip:#1f1d18;--shadow:0 34px 80px -30px rgba(0,0,0,.82)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:620px;margin:0 auto;padding-inline:16px;padding-block:34px 60px}
+.eyebrow{font:800 12px/1 "Hanken Grotesk";letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(26px,5vw,38px)/1 "Bricolage Grotesque";letter-spacing:-.02em;margin:12px 0 9px;text-wrap:balance}
+.lede{max-width:60ch;color:var(--muted);font-size:14.5px;line-height:1.55;margin:0}
+.lede b{color:var(--ink);font-weight:700}
+.stage-wrap{display:flex;justify-content:center;margin-top:22px}
+
+.phone{width:100%;max-width:378px;aspect-ratio:9/19.5;border-radius:42px;position:relative;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.09);overflow:hidden;background:#000}
+.device{position:absolute;inset:0;overflow:hidden;background:#efece3;color:#1b1a17;border-radius:42px;display:flex;flex-direction:column}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 2px;font-size:11.5px;font-weight:700;flex:none;z-index:6}
+.sb .r{font-size:10px;opacity:.85}
+.topnav{position:relative;display:flex;align-items:center;gap:8px;padding:6px 14px 6px;flex:none;z-index:6}
+.zones{position:relative;display:flex;flex:1;gap:2px;min-width:0}
+.zone{flex:1;background:none;border:0;cursor:pointer;padding:7px 2px 11px;font:800 12.5px/1 "Hanken Grotesk";color:#9a9488;white-space:nowrap}
+.zone[aria-current="true"]{color:#1b1a17}
+.zind{position:absolute;bottom:0;height:3px;border-radius:999px;background:#ff6b5e;left:0;width:40px;transition:left .35s var(--e-expo),width .35s var(--e-expo),background .3s}
+.avatar{position:relative;width:30px;height:30px;border-radius:50%;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 12px/1 "Bricolage Grotesque";cursor:pointer;flex:none}
+.bell{position:relative;width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #e6e3d9;display:flex;align-items:center;justify-content:center;color:#6f6c62;cursor:pointer;flex:none}
+.bell svg{width:16px;height:16px}
+.bell .nbadge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:999px;background:#ff6b5e;color:#2a0b07;font:800 9px/16px "Hanken Grotesk";text-align:center;padding:0 3px;border:2px solid #efece3}
+.nrow{display:flex;align-items:flex-start;gap:11px;padding:11px 2px;border-top:1px solid #eae4d6}.nrow:first-of-type{border-top:0}
+.nrow .ni{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";flex:none}
+.ni.pr{background:#e9f3d2;color:#4b7a00}.ni.meal{background:#ffe6c7;color:#b4701f}.ni.meso{background:#ffd9d4;color:#b4442e}.ni.rest{background:#e7edf6;color:#3b5c86}
+.nrow .nt{font:800 13px/1.25 "Hanken Grotesk"}.nrow .ns{font:600 11px/1.3 "Hanken Grotesk";color:#8a867b;margin-top:2px}
+.nrow .ntime{margin-left:auto;font:700 10px/1 "Hanken Grotesk";color:#b4ae9f;white-space:nowrap;padding-left:8px}
+.nrow.unread .nt::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff6b5e;margin-left:6px;vertical-align:middle}
+
+.stage{position:relative;flex:1;min-height:0;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:4px 13px 16px;display:flex;flex-direction:column;gap:11px;background:#efece3}
+.screen[hidden]{display:none}
+.screen::-webkit-scrollbar{width:0}
+.pushed{z-index:10}
+.flashdisc{position:absolute;inset:0;z-index:9;display:none;pointer-events:none}
+
+.sech{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;color:#9a9488;padding:5px 2px 0}
+.hero{background:#1a1813;color:#fff;border-radius:22px;padding:16px;position:relative;overflow:hidden}
+.hero .k{font:800 10px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:#ff9d6a}
+.hero .htop{display:flex;justify-content:space-between;align-items:center}
+.hero .nm{font:800 30px/1 "Bricolage Grotesque";letter-spacing:-.025em;margin:8px 0 3px}
+.hero .meta{font:600 12px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.66)}
+.wk{display:flex;gap:5px;margin:12px 0 2px}
+.wk .c{flex:1;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:800 10px/1 "Bricolage Grotesque";background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
+.wk .c.done{background:#bfe39a;color:#243800}.wk .c.today{background:#ff6b5e;color:#2a0b07}
+.wk .c.rest{font-size:8px;color:rgba(255,255,255,.3)}
+.go{margin-top:13px;width:100%;background:#ff6b5e;color:#2a0b07;border:0;border-radius:13px;padding:13px;font:800 15px/1 "Hanken Grotesk";cursor:pointer}
+.go:active{transform:scale(.98)}
+.daterow{display:flex;justify-content:space-between;align-items:center;padding:2px 2px 0}
+.daterow .d{font:800 22px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.t{border-radius:22px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:100px;position:relative;overflow:hidden}
+.t .tk{font:800 10px/1 "Hanken Grotesk";letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.t .val{font:800 26px/1 "Bricolage Grotesque";letter-spacing:-.02em;margin-top:auto}
+.t .val small{font-size:11px;opacity:.55;font-weight:700}
+.coral{background:#ff6b5e;color:#2a0b07}.sky{background:#8fd3e8;color:#06252f}.amber{background:#ffc247;color:#2a1c00}.card{background:#fff;border:1px solid #e6e3d9}
+.fuelbar{height:7px;border-radius:999px;background:rgba(0,0,0,.14);margin-top:9px;overflow:hidden}.fuelbar i{display:block;height:100%;width:62%;background:#2a0b07;border-radius:999px}
+.logged{position:absolute;top:12px;right:13px;font:800 9px/1 "Hanken Grotesk";letter-spacing:.08em;background:rgba(40,120,0,.12);color:#3c7a00;padding:5px 7px;border-radius:999px}
+.quote{padding:10px 8px 2px}
+.quote .ql{font:800 10px/1 "Hanken Grotesk";letter-spacing:.16em;text-transform:uppercase;color:#c23b16}
+.quote blockquote{margin:9px 0 6px;font:500 italic 17px/1.4 "Newsreader",Georgia,serif;color:#7a766b}
+.quote .qa{font:800 11px/1 "Hanken Grotesk";color:#9a9488}
+
+/* eat */
+.fuel{background:#1a1813;color:#fff;border-radius:22px;padding:16px}
+.fuel .big{font:800 42px/1 "Bricolage Grotesque";letter-spacing:-.03em;margin:8px 0 2px}
+.fuel .big small{font-size:13px;color:rgba(255,255,255,.55);font-weight:700}
+.cbar{height:8px;border-radius:999px;background:rgba(255,255,255,.14);margin-top:11px;overflow:hidden}.cbar i{display:block;height:100%;width:37%;background:#ff6b5e;border-radius:999px}
+.macros{display:flex;gap:9px;margin-top:12px}
+.macro{flex:1}.macro .ml{display:flex;justify-content:space-between;font:700 10px/1 "Hanken Grotesk";color:rgba(255,255,255,.72);margin-bottom:5px}.macro .ml b{color:#fff;font-weight:800}
+.mbar{height:5px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}.mbar i{display:block;height:100%;border-radius:999px}
+.coach{background:#eef6df;border:1px solid #cfe6a6;border-radius:15px;padding:12px 13px;font:600 12px/1.4 "Hanken Grotesk";color:#3b5a16}.coach b{color:#2a4010;font-weight:800}
+.meal{background:#fff;border:1px solid #e6e3d9;border-radius:16px;padding:12px 13px}
+.meal .mh{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.meal .mn{font:800 14px/1 "Bricolage Grotesque"}.meal .mk{margin-left:auto;font:800 13px/1 "Bricolage Grotesque"}.meal .mk small{font-size:9px;color:#9a9488}
+.fitem{display:flex;align-items:center;gap:10px;padding:5px 0}
+.fc{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";flex:none}
+.fc.oat{background:#f3e7cf;color:#8a6a2a}.fc.fruit{background:#ffe6c7;color:#b4701f}.fc.meat{background:#ffd9d4;color:#b4442e}.fc.dairy{background:#e7edf6;color:#3b5c86}
+.fitem .fn{font:700 12.5px/1.1 "Hanken Grotesk"}.fitem .fk{margin-left:auto;font:800 12px/1 "Bricolage Grotesque"}
+.addbar{display:flex;gap:9px;margin-top:4px}
+.addbar .afind{flex:1;background:#ff6b5e;color:#2a0b07;border:0;border-radius:14px;padding:13px;font:800 14px/1 "Hanken Grotesk";cursor:pointer}
+.addbar .scan{width:48px;border:1px solid #e6e3d9;background:#fff;border-radius:14px;font-size:16px;color:#6f6c62;cursor:pointer}
+.ringwrap{display:flex;flex-direction:column;align-items:center;background:#1a1813;color:#fff;border-radius:22px;padding:18px 16px}
+.ering{width:150px;height:150px;border-radius:50%;position:relative;background:conic-gradient(#ff6b5e 0 37%, rgba(255,255,255,.12) 37% 100%)}
+.ering::after{content:"";position:absolute;inset:15px;border-radius:50%;background:#1a1813}
+.ering b{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.ering .ern{font:800 34px/1 "Bricolage Grotesque";letter-spacing:-.03em}
+.ering .erl{font:700 9px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:5px}
+.mrings{display:flex;gap:16px;margin-top:15px}
+.mr{text-align:center}
+.mr .d{width:46px;height:46px;border-radius:50%;position:relative;margin:0 auto}
+.mr .d::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#1a1813}
+.mr .v{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font:800 12px/1 "Bricolage Grotesque"}
+.mr .lb{font:700 9px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:6px}
+
+/* lift */
+.rrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e6e3d9;border-radius:16px;padding:12px;cursor:pointer}
+.rrow:active{transform:scale(.99)}
+.rrow .ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 13px/1 "Bricolage Grotesque";flex:none}
+.rrow .ic.p{background:#ffe0d8;color:#b4442e}.rrow .ic.u{background:#dfeaf6;color:#375c86}.rrow .ic.l{background:#e9f3d2;color:#4b7a00}
+.rrow .nm{font:800 15px/1.1 "Hanken Grotesk"}.rrow .sub{font:600 11.5px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}.rrow .chev{margin-left:auto;color:#c7c2b4;font-size:18px}
+.quick{display:flex;gap:9px}
+.qa{flex:1;background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:12px;text-align:center;cursor:pointer}
+.qa:active{transform:scale(.97)}.qa .qi{font-size:16px}.qa .ql{font:800 12px/1.1 "Hanken Grotesk";margin-top:6px}.qa .qs{font:600 10px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}
+
+/* pushed header */
+.phead{display:flex;align-items:center;gap:11px;padding:10px 4px 6px;flex:none}
+.phead .bk{width:30px;height:30px;border-radius:50%;background:#e3dfd3;color:#6f6c62;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer}
+.phead .t{font:800 20px/1 "Bricolage Grotesque";letter-spacing:-.02em}
+.phead .r{margin-left:auto;font:800 11px/1 "Hanken Grotesk";color:#8a867b}
+
+/* active workout */
+.cex{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e6e3d9;border-radius:15px;padding:11px 13px}
+.cex .ring{width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;position:relative}
+.cex .ring::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}
+.cex .ring b{position:relative;z-index:1;font:800 10px/1 "Bricolage Grotesque";color:#1a1813}
+.cex .nm{font:800 14px/1.1 "Hanken Grotesk"}.cex .sub{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}.cex .cnt{margin-left:auto;font:700 11px/1 "Hanken Grotesk";color:#8a867b}
+.awwrap{position:relative;border-radius:22px;overflow:hidden}
+.ex{background:#1a1813;color:#fff;border-radius:22px;padding:16px;position:relative;overflow:hidden}
+.ex .top{display:flex;justify-content:space-between;align-items:baseline}.ex .exn{font:800 21px/1 "Bricolage Grotesque";letter-spacing:-.02em}.ex .ct{font:800 11px/1 "Hanken Grotesk";color:#ff9d6a}
+.ex .tgt{font:600 12px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.66);margin-top:5px}.ex .tgt b{color:#fff;font-weight:800}
+.rir{display:inline-block;font:800 9.5px/1 "Hanken Grotesk";background:rgba(255,107,94,.22);color:#ff9d6a;padding:4px 7px;border-radius:6px;margin-left:3px}
+.banked{margin-top:11px}.brow{display:flex;align-items:center;gap:9px;padding:6px 2px}
+.brow .sn{font:800 9px/1 "Hanken Grotesk";color:rgba(255,255,255,.4);width:38px}.brow .sv{font:800 14px/1 "Bricolage Grotesque"}.brow .sv small{font-size:9px;color:rgba(255,255,255,.5)}.brow .ck{margin-left:auto;width:18px;height:18px;border-radius:50%;background:#bfe39a;color:#243800;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.flab{font:800 9px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin:13px 0 7px}
+.fields{display:flex;gap:7px}
+.fld{flex:1;background:#fff;border:2px solid #fff;border-radius:13px;padding:9px 6px;text-align:center;cursor:pointer}
+.fld .fl{font:800 8.5px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:#9a9488}
+.fld .fv{font:800 24px/1 "Bricolage Grotesque";color:#1a1813;margin-top:5px;overflow:hidden}
+.fld.focus{border-color:#ff6b5e;box-shadow:0 0 0 4px rgba(255,107,94,.25)}
+.stepwrap,.keywrap{height:0;overflow:hidden}
+.stepper{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.07);border-radius:13px;padding:7px 9px}
+.stepper .sx{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.12);color:#fff;border:0;font:800 20px/1 "Bricolage Grotesque";cursor:pointer}
+.stepper .mid{flex:1;text-align:center}.stepper .mid .ml{font:800 8px/1 "Hanken Grotesk";letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55)}.stepper .mid .mv{font:800 19px/1 "Bricolage Grotesque";margin-top:4px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.key{background:rgba(255,255,255,.08);border:0;border-radius:12px;padding:12px 0;color:#fff;font:800 19px/1 "Bricolage Grotesque";cursor:pointer}.key.back{color:#ff9d6a}.key.done{background:#ff6b5e;color:#2a0b07}
+.caret{color:#ff6b5e;font-weight:800;animation:blink 1s step-end infinite}@keyframes blink{50%{opacity:0}}
+.log{margin-top:12px;width:100%;background:#ff6b5e;color:#2a0b07;border:0;border-radius:14px;padding:14px;font:800 15px/1 "Hanken Grotesk";cursor:pointer}
+.rest{position:absolute;inset:0;background:#1a1813;color:#fff;border-radius:22px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:translateY(101%);visibility:hidden}
+.rest .rk{font:800 9.5px/1 "Hanken Grotesk";letter-spacing:.14em;text-transform:uppercase;color:#ff9d6a}
+.rest .rt{font:800 54px/1 "Bricolage Grotesque";letter-spacing:-.03em;margin:9px 0 4px;font-variant-numeric:tabular-nums}
+.rest .rn{font:600 12px/1.3 "Hanken Grotesk";color:rgba(255,255,255,.62)}.rest .rn b{color:#fff}
+.rest .rbar{width:100%;height:6px;border-radius:999px;background:rgba(255,255,255,.12);margin:15px 0 13px;overflow:hidden}.rest .rbar i{display:block;height:100%;background:#ff6b5e;transform-origin:left}
+.rest .rb{display:flex;gap:8px;width:100%}.rest .rb button{flex:1;border:0;border-radius:12px;padding:12px;font:800 13px/1 "Hanken Grotesk";cursor:pointer}.rest .rb .skip{background:#ff6b5e;color:#2a0b07}.rest .rb .add{background:rgba(255,255,255,.1);color:#fff}
+
+/* profile */
+.pacct{display:flex;align-items:center;gap:13px;padding:2px 2px}
+.pacct .av{width:46px;height:46px;border-radius:15px;background:#1a1813;color:#fff;display:flex;align-items:center;justify-content:center;font:800 18px/1 "Bricolage Grotesque"}
+.pacct .nm{font:800 19px/1 "Bricolage Grotesque"}.pacct .em{font:600 11.5px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:3px}.pacct .rng{margin-left:auto;font:800 10px/1 "Hanken Grotesk";background:#fff;border:1px solid #e6e3d9;border-radius:999px;padding:8px 10px;color:#6f6c62}
+.gain{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6e3d9;border-radius:14px;padding:11px 13px}
+.gain .nm{font:800 13.5px/1.1 "Hanken Grotesk"}.gain .e{font:600 11px/1.2 "Hanken Grotesk";color:#8a867b;margin-top:2px}.gain .d{margin-left:auto;font:800 14px/1 "Bricolage Grotesque";color:var(--good)}.gain .d small{font-size:9px}
+.lmrow{margin-top:9px}.lmhead{display:flex;justify-content:space-between;font:700 11px/1 "Hanken Grotesk"}.lmhead .ct{color:rgba(255,255,255,.6)}
+.lmtrack{position:relative;height:8px;border-radius:999px;background:rgba(255,255,255,.12);margin-top:6px}.lmtrack .fill{height:100%;border-radius:999px}.lmtrack .tick{position:absolute;top:-3px;width:2px;height:14px;background:rgba(255,255,255,.4)}
+.lmleg{display:flex;gap:12px;margin-top:11px}.lmleg i{display:inline-flex;align-items:center;gap:5px;font:700 9px/1 "Hanken Grotesk";letter-spacing:.04em;text-transform:uppercase}.lmleg i::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+
+/* settings */
+.setgroup{background:#fff;border:1px solid #e6e3d9;border-radius:16px;overflow:hidden}
+.setrow{display:flex;align-items:center;gap:13px;padding:13px 14px;border-top:1px solid #f1ece0}.setrow:first-child{border-top:0}
+.setrow .mono{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font:800 11px/1 "Bricolage Grotesque";flex:none}
+.mono.watch{background:#e7edf6;color:#3b5c86}.mono.phone{background:#eef1ec;color:#5a6b57}.mono.sh{background:#e3f0da;color:#3f7a2e}
+.setrow .l{font:800 14px/1.15 "Hanken Grotesk"}.setrow .s{font:600 11px/1.3 "Hanken Grotesk";color:#8a867b;margin-top:3px}.setrow .v{margin-left:auto;font:800 13px/1 "Hanken Grotesk";display:flex;align-items:center;gap:8px}
+.conn{font:800 12px/1 "Hanken Grotesk";color:var(--good)}.arrow{color:#cfc9bb;font-size:16px}
+.toggle{margin-left:auto;width:44px;height:26px;border-radius:999px;background:var(--good);position:relative;flex:none}.toggle.off{background:#d3cdbf}.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff}.toggle:not(.off)::after{left:21px}
+.shh2{font:800 15px/1 "Bricolage Grotesque";letter-spacing:-.01em;padding:14px 2px 6px}
+
+/* popup */
+.scrim{position:absolute;inset:0;background:rgba(20,18,12,.52);opacity:0;visibility:hidden;z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#efece3;border-radius:26px 26px 0 0;padding:16px 16px 20px;z-index:30;visibility:hidden;box-shadow:0 -24px 60px -24px rgba(0,0,0,.45)}
+.shh{font:800 21px/1 "Bricolage Grotesque";letter-spacing:-.02em;text-align:center}
+.shs{font:600 12.5px/1.3 "Hanken Grotesk";color:#8a867b;text-align:center;margin:5px 0 15px}
+.sopt{width:100%;background:#fff;border:1px solid #e6e3d9;border-radius:16px;padding:15px;text-align:left;font:800 16px/1.1 "Hanken Grotesk";color:#1a1813;display:flex;flex-direction:column;gap:4px;cursor:pointer;margin-bottom:9px}
+.sopt small{font:600 12px/1.3 "Hanken Grotesk";color:#8a867b}.sopt.primary{background:#ff6b5e;color:#2a0b07;border-color:#ff6b5e}.sopt.primary small{color:#5c1a10}
+.srow{display:flex;gap:9px}.ssm{flex:1;background:none;border:1px solid #e6e3d9;border-radius:12px;padding:11px;font:800 12px/1 "Hanken Grotesk";color:#6f6c62;cursor:pointer}.ssm.danger{color:var(--under);border-color:#f0cfc9}
+.cancel{width:100%;background:none;border:0;padding:12px;font:800 13px/1 "Hanken Grotesk";color:#8a867b;cursor:pointer;margin-top:4px}
+.toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);z-index:40;opacity:0;font:800 10px/1 "Hanken Grotesk";letter-spacing:.06em;text-transform:uppercase;color:#243800;background:#bfe39a;padding:8px 13px;border-radius:999px;pointer-events:none;white-space:nowrap}
+.handle{flex:none;display:flex;justify-content:center;padding:4px 0 9px;background:#efece3;z-index:6}.handle span{width:104px;height:4px;border-radius:999px;background:#1b1a17;opacity:.18}
+
+.caption{max-width:60ch;margin:22px auto 0;color:var(--muted);font-size:13px;line-height:1.6;text-align:center}.caption b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap">
+
+<div class="wrap">
+  <span class="eyebrow">SamsisFit &middot; Full app simulation</span>
+  <h1>Walk the whole app</h1>
+  <p class="lede">Every converged screen, stitched together and live. Tap the top <b>Your Day / Eat / Lift</b> tabs (radial-Sunset flash), tap the <b>S avatar</b> for Progress or Settings, on Lift tap a <b>routine</b> or <b>Build</b> for the option pop-ups, and <b>Start a workout</b> to log sets, rest, and advance. Everything is tappable.</p>
+
+  <div class="stage-wrap">
+    <div class="phone"><div class="device">
+      <div class="sb"><span>11:39</span><span class="r">58%</span></div>
+      <div class="topnav" id="topnav">
+        <div class="zones" id="zones">
+          <button class="zone" data-zone="yourday" aria-current="true">Your Day</button>
+          <button class="zone" data-zone="eat">Eat</button>
+          <button class="zone" data-zone="lift">Lift</button>
+          <span class="zind" id="zind"></span>
+        </div>
+        <span class="bell" id="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="nbadge">3</span></span>
+        <span class="avatar" id="avatar">S</span>
+      </div>
+      <div class="stage" id="stage">
+        <span class="flashdisc" id="flashdisc"></span>
+
+        <!-- YOUR DAY -->
+        <section class="screen zone" id="yourday">
+          <div class="daterow"><span class="d">Thu, Oct 1</span></div>
+          <div class="hero">
+            <div class="htop"><span class="k">Up next</span><span class="k" style="color:#ff9d6a">WEEK 2 OF 6</span></div>
+            <div class="nm">Legs A</div>
+            <div class="meta">6 exercises &middot; ~52 min</div>
+            <div class="wk"><div class="c done">1</div><div class="c today">2</div><div class="c">3</div><div class="c rest">rest</div><div class="c">5</div><div class="c">6</div></div>
+            <button class="go" data-start>Start workout &rarr;</button>
+          </div>
+          <div class="row2">
+            <div class="t coral"><div class="tk">Calories left</div><div class="val">1,502<small> of 2,400</small></div><div class="fuelbar"><i></i></div></div>
+            <div class="t card"><span class="logged">&check; LOGGED</span><div class="tk">Weight</div><div class="val">148.0<small> lb</small></div></div>
+            <div class="t amber"><div class="tk">Meals</div><div class="val">0<small>/3</small></div></div>
+            <div class="t sky"><div class="tk">Steps</div><div class="val">4,210<small>/8k</small></div></div>
+          </div>
+          <div class="quote"><span class="ql">Quote of the day</span><blockquote>"The last three or four reps is what makes the muscle grow."</blockquote><span class="qa">Arnold Schwarzenegger</span></div>
+        </section>
+
+        <!-- EAT (E2 ring dashboard, confirmed) -->
+        <section class="screen zone" id="eat" hidden>
+          <div class="ringwrap">
+            <div class="ering"><b><span class="ern">1,502</span><span class="erl">kcal left</span></b></div>
+            <div class="mrings">
+              <div class="mr"><div class="d" style="background:conic-gradient(var(--pro) 0 53%, rgba(255,255,255,.12) 0)"><span class="v">88</span></div><div class="lb">Protein</div></div>
+              <div class="mr"><div class="d" style="background:conic-gradient(var(--carb) 0 40%, rgba(255,255,255,.12) 0)"><span class="v">96</span></div><div class="lb">Carbs</div></div>
+              <div class="mr"><div class="d" style="background:conic-gradient(var(--fat) 0 34%, rgba(255,255,255,.12) 0)"><span class="v">24</span></div><div class="lb">Fat</div></div>
+            </div>
+          </div>
+          <div class="coach">On track. About <b>1,500 kcal</b> left fits a full dinner, aim <b>~70g protein</b>.</div>
+          <div class="meal"><div class="mh"><span class="mn">Breakfast</span><span class="mk">612<small> kcal</small></span></div>
+            <div class="fitem"><span class="fc oat">OM</span><div><div class="fn">Oatmeal + whey</div></div><span class="fk">420</span></div>
+            <div class="fitem"><span class="fc fruit">BA</span><div><div class="fn">Banana</div></div><span class="fk">192</span></div>
+          </div>
+          <div class="meal"><div class="mh"><span class="mn">Lunch</span><span class="mk">286<small> kcal</small></span></div>
+            <div class="fitem"><span class="fc meat">CB</span><div><div class="fn">Chicken &amp; rice bowl</div></div><span class="fk">286</span></div>
+          </div>
+          <div class="addbar"><button class="afind" data-toast="Add food">&#9906; Add food</button><button class="scan" data-toast="Scan barcode">&#9636;</button></div>
+        </section>
+
+        <!-- LIFT -->
+        <section class="screen zone" id="lift" hidden>
+          <div class="hero">
+            <div class="k">Today &middot; Mesocycle 3 &middot; W2</div>
+            <div class="nm">Legs A</div>
+            <div class="meta">6 exercises &middot; ~52 min &middot; Quads focus</div>
+            <button class="go" data-start>Start today's workout &rarr;</button>
+          </div>
+          <div class="sech">Your routines</div>
+          <div class="rrow" data-routine="Push A"><div class="ic p">PS</div><div><div class="nm">Push A</div><div class="sub">6 lifts &middot; Chest, Shoulders</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="rrow" data-routine="Pull A"><div class="ic u">PL</div><div><div class="nm">Pull A</div><div class="sub">7 lifts &middot; Back, Bis</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="rrow" data-routine="Upper B"><div class="ic l">UB</div><div><div class="nm">Upper B</div><div class="sub">6 lifts &middot; Chest, Back</div></div><span class="chev">&rsaquo;</span></div>
+          <div class="quick">
+            <div class="qa" id="buildBtn"><div class="qi">&#9874;</div><div class="ql">Build</div><div class="qs">Routine or block</div></div>
+            <div class="qa" data-toast="Empty workout"><div class="qi">+</div><div class="ql">Empty</div><div class="qs">Freestyle</div></div>
+            <div class="qa" data-toast="Browse templates"><div class="qi">&#9633;</div><div class="ql">Templates</div><div class="qs">Browse</div></div>
+          </div>
+        </section>
+
+        <!-- ACTIVE WORKOUT (pushed) -->
+        <section class="screen pushed" id="active" hidden>
+          <div class="phead"><span class="bk" data-back>&lsaquo;</span><span class="t">Legs A</span><span class="r">42:15</span></div>
+          <div class="cex"><div class="ring" style="background:conic-gradient(#8bc34a 0 100%,#efe7da 0)"><b>&check;</b></div><div><div class="nm">Back Squat</div><div class="sub">Quads &middot; +10 lb vol</div></div><div class="cnt">4/4</div></div>
+          <div class="awwrap">
+            <div class="ex" id="exface"></div>
+            <div class="rest" id="rest">
+              <div class="rk">Rest &middot; Leg Press</div><div class="rt" id="rt">1:30</div>
+              <div class="rn">Next: <b id="restnext">Set 3 &middot; 245 &times; 10 @ 2</b></div>
+              <div class="rbar"><i id="rbar"></i></div>
+              <div class="rb"><button class="skip" id="skip">Skip rest</button><button class="add" id="add30">+30s</button></div>
+            </div>
+          </div>
+          <div class="cex"><div class="ring" style="background:conic-gradient(#ff6b5e 0 0%,#efe7da 0)"><b>0/3</b></div><div><div class="nm">Hack Squat</div><div class="sub">Quads &middot; target 180 &times; 10</div></div><div class="cnt">next</div></div>
+        </section>
+
+        <!-- PROFILE (pushed) -->
+        <section class="screen pushed" id="profile" hidden>
+          <div class="phead"><span class="bk" data-back>&lsaquo;</span><span class="t">Progress</span></div>
+          <div class="pacct"><span class="av">S</span><div><div class="nm">Sam Lans</div><div class="em">Intermediate &middot; 128 sessions</div></div><span class="rng">8 weeks</span></div>
+          <div class="sech">Top strength gains &middot; est. 1RM</div>
+          <div class="gain"><div><div class="nm">Back Squat</div><div class="e">315 &rarr; 333 lb</div></div><span class="d">+18<small> lb</small></span></div>
+          <div class="gain"><div><div class="nm">Deadlift</div><div class="e">405 &rarr; 420 lb</div></div><span class="d">+15<small> lb</small></span></div>
+          <div class="gain"><div><div class="nm">Bench Press</div><div class="e">225 &rarr; 237 lb</div></div><span class="d">+12<small> lb</small></span></div>
+          <div class="sech">Volume vs landmarks &middot; sets / wk</div>
+          <div class="t" style="background:#1a1813;color:#fff;border-radius:16px;min-height:auto">
+            <div class="lmrow"><div class="lmhead"><span>Quads</span><span class="ct">18 / 22</span></div><div class="lmtrack"><div class="fill" style="width:75%;background:var(--good)"></div><div class="tick" style="left:45%"></div><div class="tick" style="left:78%"></div></div></div>
+            <div class="lmrow"><div class="lmhead"><span>Chest</span><span class="ct">13 / 18</span></div><div class="lmtrack"><div class="fill" style="width:54%;background:var(--mid)"></div><div class="tick" style="left:40%"></div><div class="tick" style="left:72%"></div></div></div>
+            <div class="lmrow"><div class="lmhead"><span>Rear delts</span><span class="ct">7 / 14</span></div><div class="lmtrack"><div class="fill" style="width:30%;background:var(--under)"></div><div class="tick" style="left:50%"></div><div class="tick" style="left:80%"></div></div></div>
+            <div class="lmleg"><i style="color:var(--under)">under</i><i style="color:var(--mid)">mid</i><i style="color:var(--good)">on target</i></div>
+          </div>
+        </section>
+
+        <!-- SETTINGS (pushed) -->
+        <section class="screen pushed" id="settings" hidden>
+          <div class="phead"><span class="bk" data-back>&lsaquo;</span><span class="t">Settings</span></div>
+          <div class="pacct"><span class="av">S</span><div><div class="nm">Sam Lans</div><div class="em">Training since 2024 &middot; Pro</div></div><span class="rng" data-toast="Edit profile">Edit</span></div>
+          <div class="shh2">Devices &amp; health</div>
+          <div class="setgroup">
+            <div class="setrow"><span class="mono watch">GW</span><div><div class="l">Galaxy Watch 8</div><div class="s">Logging + rest timer</div></div><span class="v"><span class="conn">Connected</span></span></div>
+            <div class="setrow"><span class="mono phone">PX</span><div><div class="l">This phone</div><div class="s">Primary</div></div><span class="arrow">&rsaquo;</span></div>
+            <div class="setrow"><span class="mono sh">SH</span><div><div class="l">Samsung Health</div><div class="s">Steps, HR, weight</div></div><span class="v"><span class="conn">Synced</span></span></div>
+          </div>
+          <div class="shh2">Preferences</div>
+          <div class="setgroup">
+            <div class="setrow"><div class="l">Units</div><span class="v">lb<span class="arrow">&rsaquo;</span></span></div>
+            <div class="setrow"><div class="l">Default rest</div><span class="v">2:00<span class="arrow">&rsaquo;</span></span></div>
+            <div class="setrow"><div class="l">Theme</div><span class="v">Light<span class="arrow">&rsaquo;</span></span></div>
+          </div>
+          <div class="shh2">Notifications</div>
+          <div class="setgroup">
+            <div class="setrow"><div class="l">Rest timer alerts</div><span class="toggle"></span></div>
+            <div class="setrow"><div class="l">Workout reminders</div><span class="toggle"></span></div>
+          </div>
+        </section>
+
+      </div>
+      <div class="handle"><span></span></div>
+      <span class="toast" id="toast">Done</span>
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet" id="sheet"></div>
+    </div></div>
+  </div>
+
+  <div class="caption">This is a static-data simulation for review, not the shipped app. Note anything off (fonts, sizing, icons, colours, motion) and we'll fix it as it goes into Compose. The same public page lives at samlans.github.io/samisfit-redesign-preview.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  gsap.config({force3D:true});
+  var $=function(id){return document.getElementById(id);};
+  var stage=$('stage'), zind=$('zind'), topnav=$('topnav'), disc=$('flashdisc'),
+      scrim=$('scrim'), sheet=$('sheet'), avatar=$('avatar');
+  var zones=['yourday','eat','lift'], curZone='yourday', busy=false, pushedName=null, lastTap={x:190,y:420};
+  var zoneAccent={yourday:{b:'#ff6b5e',d:'#d8402f'},eat:{b:'#ffc247',d:'#e39a0c'},lift:{b:'#8fd3e8',d:'#3f9ec0'}};
+
+  function toast(m){var t=$('toast');t.textContent=m;if(RM)return;gsap.killTweensOf(t);
+    gsap.fromTo(t,{autoAlpha:0,y:-6},{autoAlpha:1,y:0,duration:.22});gsap.to(t,{autoAlpha:0,duration:.3,delay:.9});}
+
+  function placeInd(name,animate){
+    var z=document.querySelector('.zone[data-zone="'+name+'"]'); if(!z) return;
+    var r=z.getBoundingClientRect(), br=$('zones').getBoundingClientRect();
+    zind.style.background=zoneAccent[name].b;
+    zind.style.left=(r.left-br.left+r.width*0.2)+'px'; zind.style.width=(r.width*0.6)+'px';
+  }
+
+  // flash transition between zones (radial Sunset from tapped chip)
+  function gotoZone(to){
+    if(busy||to===curZone) return;
+    var toEl=$(to); if(!toEl) return;
+    busy=true;
+    document.querySelectorAll('.zone').forEach(function(b){b.setAttribute('aria-current',b.dataset.zone===to?'true':'false');});
+    placeInd(to,true);
+    var fromEl=$(curZone);
+    toEl.hidden=false; gsap.set(toEl,{zIndex:2}); if(fromEl)gsap.set(fromEl,{zIndex:1});
+    var sr=stage.getBoundingClientRect(), z=document.querySelector('.zone[data-zone="'+to+'"]').getBoundingClientRect();
+    var ox=(z.left+z.width/2-sr.left)/sr.width*100, oy=0;
+    var maxR=Math.hypot(Math.max(ox,100-ox),100)*1.15, ac=zoneAccent[to];
+    function cleanup(){
+      zones.forEach(function(zn){ var e=$(zn); if(e && zn!==to) e.hidden=true; });
+      gsap.set(toEl,{clearProps:'all'}); if(fromEl)gsap.set(fromEl,{clearProps:'all'});
+      toEl.style.clipPath=''; if(fromEl)fromEl.style.clipPath='';
+      disc.style.display='none'; disc.style.background=''; busy=false; curZone=to;
+    }
+    if(RM){ cleanup(); return; }
+    disc.style.background='radial-gradient(circle at '+ox+'% '+oy+'%,'+ac.d+' 0 40%,'+ac.b+' 100%)';
+    gsap.set(disc,{display:'block',autoAlpha:1,zIndex:4});
+    gsap.set(toEl,{zIndex:5});
+    var st={L:0,T:0};
+    function paint(){ disc.style.clipPath='circle('+(st.L*maxR)+'% at '+ox+'% '+oy+'%)'; toEl.style.clipPath='circle('+(st.T*maxR)+'% at '+ox+'% '+oy+'%)'; }
+    paint();
+    gsap.timeline({onComplete:cleanup})
+      .to(st,{L:1.18,duration:.3,ease:'power3.out',onUpdate:paint},0)
+      .to(st,{T:1.18,duration:.56,ease:'power2.inOut',onUpdate:paint},0.18)
+      .to(disc,{autoAlpha:0,duration:.16},0.8)
+      .fromTo(toEl.children,{autoAlpha:0,y:16},{autoAlpha:1,y:0,duration:.42,stagger:.05,ease:'expo.out',clearProps:'transform'},0.3);
+  }
+
+  // push / pop pages
+  function push(name){
+    if(busy) return; busy=true; pushedName=name;
+    var el=$(name); el.hidden=false; gsap.set(el,{zIndex:12});
+    topnav.style.pointerEvents='none';
+    if(RM){ gsap.set(el,{x:0,autoAlpha:1}); busy=false; return; }
+    gsap.fromTo(el,{xPercent:100},{xPercent:0,duration:.44,ease:'expo.out',onComplete:function(){busy=false;}});
+    gsap.fromTo(el.children,{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.4,stagger:.05,ease:'expo.out',delay:.12,clearProps:'transform'});
+  }
+  function pop(){
+    if(busy||!pushedName) return; busy=true; var el=$(pushedName);
+    function done(){el.hidden=true;gsap.set(el,{clearProps:'all'});topnav.style.pointerEvents='';pushedName=null;busy=false;}
+    if(RM){done();return;}
+    gsap.to(el,{xPercent:100,duration:.36,ease:'power3.in',onComplete:done});
+  }
+
+  /* ---------- Active Workout logging ---------- */
+  var TARGET={weight:245,reps:10,rir:2}, TOTAL=4, REST=90, aw, restTimer=null;
+  function awFresh(){return {setIdx:2,banked:[{w:245,r:11,rir:3}],weight:245,reps:10,rir:2,focus:null,mode:'stepper',typing:'',resting:false,left:REST};}
+  function awLabel(f){return f==='weight'?'Weight · lb':(f==='reps'?'Reps':'RIR');}
+  function awRender(){
+    var b=aw.banked.map(function(x,i){return '<div class="brow"><span class="sn">SET '+(i+1)+'</span><span class="sv">'+x.w+'<small> lb</small> &times; '+x.r+' <small>@'+x.rir+'</small></span><span class="ck">&#10003;</span></div>';}).join('');
+    $('exface').innerHTML=''
+      +'<div class="top"><span class="exn">Leg Press</span><span class="ct">SET '+aw.setIdx+' / '+TOTAL+'</span></div>'
+      +'<div class="tgt">Target <b>245 &times; 10</b><span class="rir">@ 2 RIR</span></div>'
+      +'<div class="banked">'+b+'</div>'
+      +'<div class="flab">Logging set '+aw.setIdx+' &middot; <span style="opacity:.6;text-transform:none;letter-spacing:0">tap to nudge &middot; tap again to type</span></div>'
+      +'<div class="fields" id="fields">'
+      +'<div class="fld" data-field="weight"><div class="fl">Weight</div><div class="fv" id="f-weight">'+aw.weight+'</div></div>'
+      +'<div class="fld" data-field="reps"><div class="fl">Reps</div><div class="fv" id="f-reps">'+aw.reps+'</div></div>'
+      +'<div class="fld" data-field="rir"><div class="fl">RIR</div><div class="fv" id="f-rir">'+aw.rir+'</div></div></div>'
+      +'<div class="stepwrap" id="stepwrap"><div class="stepper"><button class="sx" id="minus">&minus;</button><div class="mid"><div class="ml" id="step-l">Weight &middot; lb</div><div class="mv" id="step-v">'+aw.weight+'</div></div><button class="sx" id="plus">+</button></div></div>'
+      +'<div class="keywrap" id="keywrap"><div class="keypad">'
+      +'<button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>'
+      +'<button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>'
+      +'<button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>'
+      +'<button class="key back" data-k="back">&#9003;</button><button class="key" data-k="0">0</button><button class="key done" data-k="done">&#10003;</button>'
+      +'</div></div>'
+      +'<button class="log" id="log">Log set '+aw.setIdx+' &rarr;</button>';
+    awWire(); awClearFocus(true);
+  }
+  function awClearFocus(instant){ if(aw.focus){$('f-'+aw.focus).textContent=aw[aw.focus];}
+    aw.focus=null;aw.mode='stepper';aw.typing='';
+    [].forEach.call(document.querySelectorAll('#fields .fld'),function(e){e.classList.remove('focus');});
+    awH('stepwrap',instant);awH('keywrap',instant);}
+  function awShow(id){var w=$(id);if(!w)return;var inner=w.firstElementChild;if(RM){w.style.height='auto';return;}gsap.killTweensOf([w,inner]);gsap.to(w,{height:inner.offsetHeight,duration:.28,ease:'expo.out'});gsap.fromTo(inner,{opacity:0,y:-6},{opacity:1,y:0,duration:.28,ease:'expo.out'});}
+  function awH(id,instant){var w=$(id);if(!w)return;gsap.killTweensOf(w);if(RM||instant){gsap.set(w,{height:0});return;}gsap.to(w,{height:0,duration:.22,ease:'power2.in'});}
+  function awFocus(f){ if(aw.focus===f){ if(aw.mode==='stepper'){awKeypad(f);} else {awClearFocus();} return; }
+    aw.focus=f;aw.mode='stepper';
+    [].forEach.call(document.querySelectorAll('#fields .fld'),function(e){e.classList.toggle('focus',e.dataset.field===f);});
+    $('step-l').textContent=awLabel(f);$('step-v').textContent=aw[f];awH('keywrap',true);awShow('stepwrap');}
+  function awKeypad(f){aw.mode='keypad';aw.typing='';awH('stepwrap',true);awShow('keywrap');awType();}
+  function awType(){var f=aw.focus;if(!f)return;var s=aw.typing!==''?aw.typing:'<span style="opacity:.3">'+aw[f]+'</span>';$('f-'+f).innerHTML=s+'<span class="caret">|</span>';}
+  function awBump(f,dir){var step=f==='weight'?5:1;var nv=aw[f]+dir*step;if(f==='rir')nv=Math.max(0,Math.min(5,nv));nv=Math.max(0,nv);aw[f]=nv;
+    if(RM){$('f-'+f).textContent=nv;$('step-v').textContent=nv;return;}
+    gsap.fromTo($('f-'+f),{y:dir*10,opacity:0},{y:0,opacity:1,duration:.2});$('f-'+f).textContent=nv;
+    gsap.fromTo($('step-v'),{y:dir*8,opacity:0},{y:0,opacity:1,duration:.2});$('step-v').textContent=nv;}
+  function awWire(){
+    [].forEach.call(document.querySelectorAll('#fields .fld'),function(e){e.addEventListener('click',function(){awFocus(e.dataset.field);if(!RM)gsap.fromTo(e,{scale:.96},{scale:1,duration:.22});});});
+    $('minus').addEventListener('click',function(){if(aw.focus)awBump(aw.focus,-1);});
+    $('plus').addEventListener('click',function(){if(aw.focus)awBump(aw.focus,1);});
+    [].forEach.call(document.querySelectorAll('#keywrap .key'),function(b){b.addEventListener('click',function(){
+      var k=b.dataset.k;if(k==='back'){aw.typing=aw.typing.slice(0,-1);awType();}
+      else if(k==='done'){var v=parseInt(aw.typing,10);if(!isNaN(v)){if(aw.focus==='rir')v=Math.max(0,Math.min(5,v));aw[aw.focus]=v;}$('f-'+aw.focus).textContent=aw[aw.focus];awClearFocus();}
+      else {var mx=aw.focus==='weight'?4:(aw.focus==='reps'?3:1);if(aw.typing.length<mx)aw.typing+=k;awType();}
+      if(!RM)gsap.fromTo(b,{scale:.9},{scale:1,duration:.18});});});
+    $('log').addEventListener('click',awLog);
+  }
+  function awFmt(s){var m=Math.floor(s/60),ss=s%60;return m+':'+(ss<10?'0':'')+ss;}
+  function awLog(){ if(aw.resting)return; awClearFocus();
+    aw.banked.push({w:aw.weight,r:aw.reps,rir:aw.rir}); toast('Set '+aw.setIdx+' banked'); aw.setIdx++;
+    awRenderBanked(); gsap.delayedCall(RM?0:.35,awStartRest);
+  }
+  function awRenderBanked(){ var box=$('exface').querySelector('.banked');
+    box.innerHTML=aw.banked.map(function(x,i){return '<div class="brow"><span class="sn">SET '+(i+1)+'</span><span class="sv">'+x.w+'<small> lb</small> &times; '+x.r+' <small>@'+x.rir+'</small></span><span class="ck">&#10003;</span></div>';}).join('');
+    if(!RM){var rows=box.querySelectorAll('.brow');gsap.fromTo(rows[rows.length-1],{autoAlpha:0,y:-6},{autoAlpha:1,y:0,duration:.35});} }
+  function awStartRest(){ if(aw.setIdx>TOTAL){awDone();return;} aw.resting=true; aw.left=REST;
+    $('restnext').innerHTML='Set '+aw.setIdx+' &middot; 245 &times; 10 @ 2'; $('rt').textContent=awFmt(aw.left);
+    var rest=$('rest'); rest.style.visibility='visible'; gsap.set('#rbar',{scaleX:1});
+    if(RM){gsap.set(rest,{y:'0%'});}else{gsap.fromTo(rest,{y:'101%'},{y:'0%',duration:.5,ease:'expo.out'});}
+    gsap.to('#rbar',{scaleX:0,duration:aw.left,ease:'none'});
+    clearInterval(restTimer); restTimer=setInterval(function(){aw.left--;$('rt').textContent=awFmt(Math.max(0,aw.left));if(aw.left<=0)awEndRest();},1000);
+  }
+  function awEndRest(){ clearInterval(restTimer); aw.resting=false; var rest=$('rest'); gsap.killTweensOf('#rbar');
+    function hide(){rest.style.visibility='hidden';awLoadNext();}
+    if(RM){gsap.set(rest,{y:'101%'});hide();}else{gsap.to(rest,{y:'101%',duration:.42,ease:'power3.in',onComplete:hide});}
+  }
+  function awLoadNext(){ if(aw.setIdx>TOTAL){awDone();return;} aw.weight=TARGET.weight;aw.reps=TARGET.reps;aw.rir=TARGET.rir;aw.focus=null;awRender();
+    if(!RM)gsap.fromTo(document.querySelectorAll('#fields .fld'),{y:14,opacity:0},{y:0,opacity:1,duration:.4,stagger:.05,ease:'expo.out',clearProps:'transform'}); }
+  function awDone(){ toast('Leg Press complete');
+    $('exface').innerHTML='<div class="top"><span class="exn">Leg Press</span><span class="ct">DONE</span></div><div class="tgt" style="margin-top:8px">4 of 4 sets &middot; <b>+5 lb vs last block</b></div><button class="log" id="nextex">Next: Hack Squat &rarr;</button>';
+    $('nextex').addEventListener('click',function(){aw=awFresh();awRender();}); }
+  $('skip').addEventListener('click',awEndRest);
+  $('add30').addEventListener('click',function(){aw.left+=30;$('rt').textContent=awFmt(aw.left);gsap.killTweensOf('#rbar');gsap.set('#rbar',{scaleX:Math.min(1,aw.left/REST)});gsap.to('#rbar',{scaleX:0,duration:aw.left,ease:'none'});});
+
+  function startWorkout(){ aw=awFresh(); awRender(); $('rest').style.visibility='hidden'; gsap.set('#rest',{y:'101%'}); push('active'); }
+
+  /* ---------- pop-up system (Deal, no drag bar) ---------- */
+  var sheetOpen=false;
+  function openSheet(html){ if(sheetOpen)return; sheetOpen=true;
+    sheet.innerHTML=html+'<button class="cancel" data-close="1">Cancel</button>';
+    [].forEach.call(sheet.querySelectorAll('[data-act]'),function(b){b.addEventListener('click',function(){var a=b.dataset.act;closeSheet(function(){handleAct(a);});});});
+    [].forEach.call(sheet.querySelectorAll('[data-close]'),function(b){b.addEventListener('click',function(){closeSheet();});});
+    sheet.style.visibility='visible';scrim.style.visibility='visible';
+    var opts=sheet.querySelectorAll('.sopt,.nrow'),extras=sheet.querySelectorAll('.srow,.cancel');
+    if(RM){gsap.set(scrim,{opacity:1});gsap.set(sheet,{autoAlpha:1});return;}
+    var tl=gsap.timeline();
+    tl.to(scrim,{opacity:1,duration:.3},0)
+      .fromTo(sheet,{yPercent:14,autoAlpha:0},{yPercent:0,autoAlpha:1,duration:.4,ease:'expo.out'},0.02);
+    opts.forEach(function(o,i){var d=i%2?1:-1;tl.fromTo(o,{x:d*150,rotation:d*5,autoAlpha:0},{x:0,rotation:0,autoAlpha:1,duration:.5,ease:'expo.out'},0.12+i*0.09);});
+    tl.fromTo(extras,{autoAlpha:0},{autoAlpha:1,duration:.3},0.32);
+  }
+  function closeSheet(after){ if(!sheetOpen){if(after)after();return;}
+    function done(){sheet.style.visibility='hidden';scrim.style.visibility='hidden';sheetOpen=false;gsap.set(sheet,{clearProps:'all'});if(after)after();}
+    if(RM){gsap.set([scrim,sheet],{autoAlpha:0});done();return;}
+    gsap.timeline({onComplete:done}).to(sheet,{yPercent:30,autoAlpha:0,duration:.32,ease:'power2.in'},0).to(scrim,{opacity:0,duration:.3},0);
+  }
+  function handleAct(a){ if(a==='start'){startWorkout();} else if(a==='profile'){push('profile');} else if(a==='settings'){push('settings');} else {toast(a);} }
+  scrim.addEventListener('click',function(){closeSheet();});
+
+  function routineSheet(n){return '<div class="shh">'+n+'</div><div class="shs">Routine &middot; 6 exercises</div>'
+    +'<button class="sopt primary" data-act="start">Start workout<small>Log this routine now</small></button>'
+    +'<button class="sopt" data-act="Editing '+n+'">Edit routine<small>Change exercises, sets, targets</small></button>'
+    +'<div class="srow"><button class="ssm" data-act="Duplicated">Duplicate</button><button class="ssm danger" data-act="Deleted">Delete</button></div>';}
+  function buildSheet(){return '<div class="shh">Build</div><div class="shs">What do you want to create?</div>'
+    +'<button class="sopt primary" data-act="New routine">Routine<small>A single training day</small></button>'
+    +'<button class="sopt" data-act="New mesocycle">Mesocycle<small>A multi-week block</small></button>';}
+  function avatarSheet(){return '<div class="shh">Sam Lans</div><div class="shs">Intermediate &middot; 128 sessions</div>'
+    +'<button class="sopt" data-act="profile">Progress &amp; stats<small>Strength, volume, consistency</small></button>'
+    +'<button class="sopt" data-act="settings">Settings<small>Devices, units, account</small></button>';}
+  function notifSheet(){return '<div class="shh">Notifications</div><div class="shs">3 new</div>'
+    +'<div class="nrow unread"><span class="ni pr">PR</span><div><div class="nt">New PR, Back Squat</div><div class="ns">333 lb estimated 1RM, up 18 this block</div></div><span class="ntime">2h</span></div>'
+    +'<div class="nrow unread"><span class="ni meso">W2</span><div><div class="nt">Week 2 starts today</div><div class="ns">Mesocycle 3, Legs A is up next</div></div><span class="ntime">9:00</span></div>'
+    +'<div class="nrow unread"><span class="ni meal">EAT</span><div><div class="nt">Time to log lunch</div><div class="ns">You usually eat around now</div></div><span class="ntime">12:30</span></div>'
+    +'<div class="nrow"><span class="ni rest">DL</span><div><div class="nt">Deload next week</div><div class="ns">Week 7 runs at ~50% volume</div></div><span class="ntime">Mon</span></div>';}
+
+  /* ---------- wiring ---------- */
+  document.querySelectorAll('.zone').forEach(function(b){b.addEventListener('click',function(){gotoZone(b.dataset.zone);});});
+  avatar.addEventListener('click',function(e){lastTap={x:e.clientX,y:e.clientY};openSheet(avatarSheet());});
+  $('bell').addEventListener('click',function(e){lastTap={x:e.clientX,y:e.clientY};openSheet(notifSheet());var b=$('bell').querySelector('.nbadge');if(b)b.style.display='none';});
+  $('buildBtn').addEventListener('click',function(){openSheet(buildSheet());});
+  stage.addEventListener('click',function(e){
+    var r=e.target.closest('[data-routine]'); var s=e.target.closest('[data-start]'); var t=e.target.closest('[data-toast]'); var bk=e.target.closest('[data-back]');
+    if(bk){pop();return;}
+    if(s){startWorkout();return;}
+    if(r){openSheet(routineSheet(r.dataset.routine));return;}
+    if(t){toast(t.dataset.toast);return;}
+  });
+
+  window.addEventListener('load',function(){placeInd('yourday',false);});
+  placeInd('yourday',false);
+})();
+</script>
